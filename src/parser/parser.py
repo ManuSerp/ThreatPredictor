@@ -49,6 +49,7 @@ def parse_kdd(file_name, path_save):
     index_symbol = [1, 2, 3, 6, 11, 20, 21]
     unique_values = get_unique_value(index_symbol, array)
     print(unique_values)
+    # we now want to auto encode this
 
 
 if __name__ == '__main__':
