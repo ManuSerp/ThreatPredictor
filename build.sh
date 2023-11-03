@@ -37,7 +37,8 @@ if [ -d "$dir/output/temp" ]; then
 else
     mkdir "$dir/output/temp"
 fi
-
+# Download the dataset
+# KDD cup 1999 dataset
 echo "Downloading KDD Cup 1999 dataset..."
 
 wget http://kdd.ics.uci.edu/databases/kddcup99/"$file"
@@ -47,6 +48,8 @@ rm "$file"
 
 echo "extracting data..."
 cd "$dir" && gzip -d "$file"
+
+# Futur datasets:
 
 
 
