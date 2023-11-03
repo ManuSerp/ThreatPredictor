@@ -15,7 +15,7 @@ def get_unique_value(column_index, array):
 
 
 # custom something to compute the path in the name, to be able to save where we want
-def parse_file(file_name, path_save="./data/output/temp/"):
+def parse_file(file_name, path_save="../data/output/temp/"):
     file_path, file_name = os.path.split(file_name)
     file_path += "/"
     if os.path.exists(path_save+file_name+"-array.pkl"):
@@ -33,7 +33,7 @@ def parse_file(file_name, path_save="./data/output/temp/"):
             if len(line) > 1:
                 res.append(line)
 
-        array = np.array(res, dtype=object)
+        array = np.array(res)
         array2d = np.vstack(array)
         # File does not exist, so save the data to the file
         with open(path_save+file_name+"-array.pkl", 'wb') as file:
@@ -44,11 +44,22 @@ def parse_file(file_name, path_save="./data/output/temp/"):
     return array2d
 
 
+def one_hot_encode(array, index_symbol):
+    unique_values = get_unique_value(index_symbol, array)
+    newarray = array.copy()
+    zerocol = np.zeros((len(array), 1))
+    for x, i in enumerate(index_symbol):
+        print(len(unique_values[x]))
+        print(zerocol.shape)
+        print(newarray.shape)
+        newarray = np.insert(newarray, i,0, axis=1)
+    print(newarray.shape)
+
+
 def parse_kdd(file_name, path_save):
     array = parse_file(file_name, path_save)
     index_symbol = [1, 2, 3, 6, 11, 20, 21]
-    unique_values = get_unique_value(index_symbol, array)
-    print(unique_values)
+    one_hot_encode(array, index_symbol)
     # we now want to auto encode this
 
 
