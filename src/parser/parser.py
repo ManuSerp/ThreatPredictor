@@ -44,16 +44,13 @@ def parse_file(file_name, path_save="./data/output/temp/"):
     return array2d
 
 
-def parse_kdd(file_name):
-    array = parse_file(file_name)
+def parse_kdd(file_name, path_save):
+    array = parse_file(file_name, path_save)
     index_symbol = [1, 2, 3, 6, 11, 20, 21]
     unique_values = get_unique_value(index_symbol, array)
     print(unique_values)
 
 
 if __name__ == '__main__':
-    a = parse_file('../../data/kddcup.data_10_percent',
-                   "../../data/output/temp/")
-    print(a)
-    unique_values = np.unique(a[:, 1])
-    print(unique_values)
+    a = parse_kdd('../../data/kddcup.data_10_percent',
+                  "../../data/output/temp/")
