@@ -68,19 +68,19 @@ def one_hot_encode(array, index_symbol,log_path="../data/output/parsing/",tag=''
     return newarray
 
 def get_ohe(array, index_symbol,log_path,path_save, tag=''): # class better too much args
-
-    if os.path.exists(path_save+"ohe"+tag+".pkl"):
+    str_save=path_save+"_ohe"+tag+".pkl"
+    if os.path.exists(str_save):
         print("Ohe File detected!")
         # File exists, so load the data from the file
-        with open(path_save+"ohe"+tag+".pkl", 'rb') as file:
+        with open(str_save, 'rb') as file:
             array_out = pickle.load(file)
         print("Ohe "+path_save+"ohe"+tag+".pkl"+"exists. Data has been loaded.")
 
     else:
         print("Ohe File not detected! building it...")
         array_out=one_hot_encode(array, index_symbol,log_path)
-        with open(path_save+"ohe"+tag+".pkl", 'rb') as file:
-            array_out = pickle.load(file)
+        with open(str_save, 'wb') as file:
+            pickle.dump(array_out,file)
         print("Ohe "+path_save+"ohe"+tag+".pkl"+"does not exist. Data has been saved.")
 
     
