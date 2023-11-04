@@ -56,7 +56,7 @@ def one_hot_encode(array, index_symbol,log_path="../data/output/parsing/",tag=''
     print("Creating new array...")
     for x, i in enumerate(index_symbol):
         for j in tqdm(range(len(unique_values[x]))):
-            newarray = np.insert(newarray, i, 0, axis=1)
+            newarray = np.insert(newarray, i, 0, axis=1) # completement faux, besoin de se rapeller des index qui augmentent, faut faire en ordre decroissant l'insertion
     
     print("Assigning bool...")
     for id in tqdm(range(len(array))):
