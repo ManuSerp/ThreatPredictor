@@ -1,8 +1,8 @@
-
+"""parser code"""
 # open file and read it
-import numpy as np
 import os
 import pickle
+import numpy as np
 from tqdm import tqdm
 
 def get_unique_value(column_index, array):
@@ -26,6 +26,7 @@ def parse_file(file_name, path_save="../data/output/temp/"):
     else:
         file = open(file_path+file_name, 'r')
         file_content = file.read()
+        file.close()
         file_content = file_content.split('\n')
         res = []
         for line in file_content:
@@ -44,19 +45,21 @@ def parse_file(file_name, path_save="../data/output/temp/"):
     return array2d
 
 
-def one_hot_encode(array, index_symbol,log_path="../data/output/parsing/",tag=''): # class better too much args
+def one_hot_encode(array, index_symbol,log_path="../data/output/parsing/",tag=''): 
+    # class better too much args
     unique_values = get_unique_value(index_symbol, array)
     with open(log_path+tag+"_ohe_log.txt","w") as file:
         for x, i in enumerate(index_symbol):
             file.write("Column "+str(i)+" has "+str(len(unique_values[x]))+" unique values.\n")
             file.write("Unique values are: "+str(unique_values[x])+"\n")
             file.write("\n")
-    
+
     newarray = array.copy()
     print("Creating new array...")
     for x, i in enumerate(index_symbol):
-        for j in tqdm(range(len(unique_values[x]))):
-            newarray = np.insert(newarray, i, 0, axis=1) # completement faux, besoin de se rapeller des index qui augmentent, faut faire en ordre decroissant l'insertion
+        for _ in tqdm(range(len(unique_values[x]))):
+            newarray = np.insert(newarray, i, 0, axis=1) 
+            # completement faux, besoin de se rapeller des index qui augmentent, faut faire en ordre decroissant l'insertion
         #penser a supprimer la colonne d'avant
     print("Assigning bool...")
     for id in tqdm(range(len(array))):
@@ -99,6 +102,6 @@ def parse_kdd(file_name, path_save, log_path):
 
 
 if __name__ == '__main__':
-    path_save="../../data/output/temp/"
-    log_path="../../data/output/parsing/"
-    a = parse_kdd('../../data/kddcup.data_10_percent', path_save,log_path)
+    PATH_SAVE="../../data/output/temp/"
+    LOG_PATH="../../data/output/parsing/"
+    a = parse_kdd('../../data/kddcup.data_10_percent', PATH_SAVE,LOG_PATH)
