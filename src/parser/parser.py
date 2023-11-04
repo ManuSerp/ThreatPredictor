@@ -90,10 +90,11 @@ def get_ohe(array, index_symbol,log_path,path_save, tag=''): # class better too 
 
 
 def parse_kdd(file_name, path_save, log_path):
-    array = parse_file(file_name, path_save)
+    array = parse_file(file_name, path_save) # ca ne devrait pasa etre appelé si on a le pkl de ohe
     index_symbol = [1, 2, 3, 6, 11, 20, 21]
     array_out = get_ohe(array, index_symbol,log_path,path_save)
     # we now want to auto encode this
+    print(array_out[0])
     return array_out
 
 
