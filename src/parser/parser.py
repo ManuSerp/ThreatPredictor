@@ -2,8 +2,19 @@
 # open file and read it
 import os
 import pickle
+import math
 import numpy as np
 from tqdm import tqdm
+
+
+def int_to_binary_list(n):
+    if n == 0:
+        return [0]
+
+    binary_string = bin(n)[2:] 
+    binary_list = [int(bit) for bit in binary_string]
+
+    return binary_list
 
 def get_unique_value(column_index, array):
     res = []
@@ -56,17 +67,22 @@ def one_hot_encode(array, index_symbol,log_path="../data/output/parsing/",tag=''
 
     newarray = array.copy()
     print("Creating new array...")
-    for x, i in enumerate(index_symbol):
-        for _ in tqdm(range(len(unique_values[x]))):
+    for x, i in enumerate(index_symbol[::-1]):
+        newarray = np.delete(newarray, i, axis=1)
+        longueur=len(unique_values[len(index_symbol)-x-1])
+        binary_length= math.log(longueur,2)
+        bl=math.ceil(binary_length)
+        for _ in tqdm(range(bl)):
             newarray = np.insert(newarray, i, 0, axis=1) 
-            # completement faux, besoin de se rapeller des index qui augmentent, faut faire en ordre decroissant l'insertion
-        #penser a supprimer la colonne d'avant
-    print("Assigning bool...")
+    print("Assigning binary bool value...")
     for id in tqdm(range(len(array))):
         ligne=array[id]
         for x, i in enumerate(index_symbol):
             pos=unique_values[x].tolist().index(ligne[i])
-            newarray[id][i+pos]=1
+            binary_list=int_to_binary_list(pos) # binary encoding
+            for index, value in enumerate(binary_list):
+
+                newarray[id][i+index]=value
     # we now have a one hot encoded array
     return newarray
 
@@ -96,8 +112,9 @@ def parse_kdd(file_name, path_save, log_path):
     array = parse_file(file_name, path_save) # ca ne devrait pasa etre appelé si on a le pkl de ohe
     index_symbol = [1, 2, 3, 6, 11, 20, 21]
     array_out = get_ohe(array, index_symbol,log_path,path_save)
+    sparsity = 1.0 - np.count_nonzero(array_out) / array_out.size
+    print(sparsity)
     # we now want to auto encode this
-    print(array_out[0])
     return array_out
 
 
@@ -105,3 +122,4 @@ if __name__ == '__main__':
     PATH_SAVE="../../data/output/temp/"
     LOG_PATH="../../data/output/parsing/"
     a = parse_kdd('../../data/kddcup.data_10_percent', PATH_SAVE,LOG_PATH)
+    print(a[0])
