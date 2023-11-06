@@ -24,8 +24,19 @@ def get_unique_value(column_index, array):
         res.append(unique_values)
     return res
 
+def int_cleaning(array):
+    for i in tqdm(range(len(array))):
+        for j in range(len(array[i])):
+            try:
+                array[i][j] = int(array[i][j])
+            except ValueError:
+                try:
+                    array[i][j] = float(array[i][j])
+                except ValueError:
+                    pass
+    return array
 
-# custom something to compute the path in the name, to be able to save where we want
+
 def parse_file(file_name, path_save="../data/output/temp/"):
     file_path, file_name = os.path.split(file_name)
     file_path += "/"
@@ -83,7 +94,7 @@ def one_hot_encode(array, index_symbol,log_path="../data/output/parsing/",tag=''
             for index, value in enumerate(binary_list):
 
                 newarray[id][i+index]=value
-    # we now have a one hot encoded array
+    # we now have a one hot encoded array binary
     return newarray
 
 def get_ohe(array, index_symbol,log_path,path_save, tag=''): # class better too much args
@@ -112,7 +123,9 @@ def parse_kdd(file_name, path_save, log_path):
     array = parse_file(file_name, path_save) # ca ne devrait pasa etre appelé si on a le pkl de ohe
     index_symbol = [1, 2, 3, 6, 11, 20, 21]
     array_out = get_ohe(array, index_symbol,log_path,path_save)
-    sparsity = 1.0 - np.count_nonzero(array_out) / array_out.size
+    array_out = int_cleaning(array_out) # int string to int, marche pas because there is string in the matrix so the matrix type is object
+    sparsity = 1.0 - np.count_nonzero(array_out) / array_out.size # dont work for the moment
+    print("Sparsity of the array is: ")
     print(sparsity)
     # we now want to auto encode this
     return array_out
