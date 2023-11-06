@@ -8,6 +8,8 @@ Can be safely deleted after running.
 build.sh download the 10% percent dataset.
 Use `-a` option for full dataset
 
+## Current issue
+
 ACtually I have some issue whoth one hot encoding of the symbolic data
 
 - It uses a lot OF SPACE. 4.5 GB pour le 10% dataset donc ça serait 45GB pour le dataset total
@@ -21,3 +23,5 @@ Je vais l'optimiser:
   **_FAIT. On passe de 4.5G a 1.6G ce qui est deja bien mieux. Reste a tenter les sparce matrices_**
 
 - Ou encore tester le **frequency encoding** pour donner une valeur relevant numerique
+
+## FAUDRAIT FAIRE DES CLASSE AVANT QUE LE CODE SOIT TROP COMPLEXE
