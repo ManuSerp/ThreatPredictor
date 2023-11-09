@@ -5,6 +5,7 @@ import pickle
 import math
 import numpy as np
 from tqdm import tqdm
+from scipy.sparse import csr_matrix
 
 
 def int_to_binary_list(n):
@@ -137,12 +138,15 @@ class Parser:
         sparsity = 1.0 - np.count_nonzero(array_out) / array_out.size 
         print("Sparsity of the array is: ")
         print(sparsity)
-        return array_out,label
+        sparse_array = csr_matrix(array_out)
+        return sparse_array,label
 
 
 if __name__ == '__main__':
     PATH_SAVE="../../data/output/temp/"
     LOG_PATH="../../data/output/parsing/"
     parser=Parser(PATH_SAVE,LOG_PATH)
-    a = parser.parse_kdd('../../data/kddcup.data_10_percent')
-    print(a[0])
+    s,l = parser.parse_kdd('../../data/kddcup.data_10_percent')
+
+    with open(LOG_PATH+"sparse.pkl", 'wb') as file:
+        pickle.dump([s,l], file)
