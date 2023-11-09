@@ -5,6 +5,7 @@ import pickle
 import math
 import numpy as np
 from tqdm import tqdm
+from scipy.sparse import csr_matrix
 
 
 def int_to_binary_list(n):
@@ -25,16 +26,13 @@ def get_unique_value(column_index, array):
     return res
 
 def int_cleaning(array):
-    for i in tqdm(range(len(array))):
-        for j in range(len(array[i])):
-            try:
-                array[i][j] = int(array[i][j])
-            except ValueError:
-                try:
-                    array[i][j] = float(array[i][j])
-                except ValueError:
-                    pass
-    return array
+    label = array[:, -1]
+    array = array[:, :-1]
+
+    array=array.astype(np.float64)
+    print(array.dtype)
+    return array, label
+
 
 
 
@@ -46,7 +44,7 @@ class Parser:
         self.tag = ''
     
     
-
+    
 
     def parse_file(self,file_name):
         file_path, file_name = os.path.split(file_name)
@@ -130,24 +128,34 @@ class Parser:
     def set_tag(self,tag):
         self.tag=tag
 
+    def normalization(self,array):
+        max_values = array.max(axis=0)
+        array = np.nan_to_num(array / max_values, nan=0.0)
+        return array
 
 
+
+## KDD CUP 99
 
     def parse_kdd(self, file_name):
         array = self.parse_file(file_name) # ca ne devrait pasa etre appelé si on a le pkl de ohe
         index_symbol = [1, 2, 3, 6, 11, 20, 21]
         array_out = self.get_ohe(array, index_symbol)
-        array_out = int_cleaning(array_out) # int string to int, marche pas because there is string in the matrix so the matrix type is object
-        sparsity = 1.0 - np.count_nonzero(array_out) / array_out.size # dont work for the moment
+        array_out, label = int_cleaning(array_out) # on enleve les labels et on convertit en float
+        array_out=self.normalization(array_out) # on normalise
+
+        sparsity = 1.0 - np.count_nonzero(array_out) / array_out.size 
         print("Sparsity of the array is: ")
         print(sparsity)
-        # we now want to auto encode this
-        return array_out
+        sparse_array = csr_matrix(array_out) # sauvegarde as sparse array
+        return sparse_array,label
 
 
 if __name__ == '__main__':
     PATH_SAVE="../../data/output/temp/"
     LOG_PATH="../../data/output/parsing/"
     parser=Parser(PATH_SAVE,LOG_PATH)
-    a = parser.parse_kdd('../../data/kddcup.data_10_percent')
-    print(a[0])
+    s,l = parser.parse_kdd('../../data/kddcup.data_10_percent')
+
+    with open(LOG_PATH+"sparse.pkl", 'wb') as file:
+        pickle.dump([s,l], file)
