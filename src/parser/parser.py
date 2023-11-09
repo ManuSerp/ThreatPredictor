@@ -25,17 +25,12 @@ def get_unique_value(column_index, array):
     return res
 
 def int_cleaning(array):
-    for i in tqdm(range(len(array))):
-        for j in range(len(array[i])):
-            try:
-                array[i][j] = int(array[i][j])
-            except ValueError:
-                try:
-                    array[i][j] = float(array[i][j])
-                except ValueError:
-                    pass
-    return array
+    label = array[:, -1]
+    array = array[:, :-1]
 
+    array=array.astype(np.float64)
+    print(array.dtype)
+    return array, label
 
 
 class Parser:
@@ -132,17 +127,17 @@ class Parser:
 
 
 
+## KDD CUP 99
 
     def parse_kdd(self, file_name):
         array = self.parse_file(file_name) # ca ne devrait pasa etre appelé si on a le pkl de ohe
         index_symbol = [1, 2, 3, 6, 11, 20, 21]
         array_out = self.get_ohe(array, index_symbol)
-        array_out = int_cleaning(array_out) # int string to int, marche pas because there is string in the matrix so the matrix type is object
-        sparsity = 1.0 - np.count_nonzero(array_out) / array_out.size # dont work for the moment
+        array_out, label = int_cleaning(array_out) 
+        sparsity = 1.0 - np.count_nonzero(array_out) / array_out.size 
         print("Sparsity of the array is: ")
         print(sparsity)
-        # we now want to auto encode this
-        return array_out
+        return array_out,label
 
 
 if __name__ == '__main__':
