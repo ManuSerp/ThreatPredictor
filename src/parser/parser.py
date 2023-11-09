@@ -34,6 +34,8 @@ def int_cleaning(array):
     return array, label
 
 
+
+
 class Parser:
     def __init__(self,path_save="../data/output/temp/",log_path="../data/output/parsing/"):
         self.path_save = path_save
@@ -42,7 +44,7 @@ class Parser:
         self.tag = ''
     
     
-
+    
 
     def parse_file(self,file_name):
         file_path, file_name = os.path.split(file_name)
@@ -126,6 +128,11 @@ class Parser:
     def set_tag(self,tag):
         self.tag=tag
 
+    def normalization(self,array):
+        max_values = array.max(axis=0)
+        array = np.nan_to_num(array / max_values, nan=0.0)
+        return array
+
 
 
 ## KDD CUP 99
@@ -134,11 +141,13 @@ class Parser:
         array = self.parse_file(file_name) # ca ne devrait pasa etre appelé si on a le pkl de ohe
         index_symbol = [1, 2, 3, 6, 11, 20, 21]
         array_out = self.get_ohe(array, index_symbol)
-        array_out, label = int_cleaning(array_out) 
+        array_out, label = int_cleaning(array_out) # on enleve les labels et on convertit en float
+        array_out=self.normalization(array_out) # on normalise
+
         sparsity = 1.0 - np.count_nonzero(array_out) / array_out.size 
         print("Sparsity of the array is: ")
         print(sparsity)
-        sparse_array = csr_matrix(array_out)
+        sparse_array = csr_matrix(array_out) # sauvegarde as sparse array
         return sparse_array,label
 
 
