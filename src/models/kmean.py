@@ -12,4 +12,8 @@ class KMeanModel(ClusterModel):
 
     def predict(self, X):
         print("==== Predict begining ====")
-        return self.model.predict(X)
+        return self.model.fit_predict(X)
+    
+    def evaluating_clustering_performance(self, X, predict_labels):
+        return super().evaluating_clustering_performance(X,predict_labels)
+    

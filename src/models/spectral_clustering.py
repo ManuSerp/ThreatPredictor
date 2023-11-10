@@ -13,4 +13,7 @@ class SpectralClusterModel(ClusterModel):
 
     def predict(self, X):
         print("==== Predict begining ====")
-        return self.model.predict(X)
+        return self.model.fit_predict(X)
+    
+    def evaluating_clustering_performance(self, X, labels_pred):
+        return super().evaluating_clustering_performance(X, labels_pred)
