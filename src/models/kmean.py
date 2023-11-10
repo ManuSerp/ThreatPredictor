@@ -16,4 +16,3 @@ class KMeanModel(ClusterModel):
     
     def evaluating_clustering_performance(self, X, predict_labels):
         return super().evaluating_clustering_performance(X,predict_labels)
-    
