@@ -138,7 +138,11 @@ class Parser:
 ## KDD CUP 99
 
     def parse_kdd(self, file_name):
-        array = self.parse_file(file_name) # ca ne devrait pasa etre appelé si on a le pkl de ohe
+        str_save=self.path_save+"_ohe"+self.tag+".pkl"
+        if not os.path.exists(str_save):
+            array = self.parse_file(file_name) # ca ne devrait pasa etre appelé si on a le pkl de ohe
+        else:
+            array=None
         index_symbol = [1, 2, 3, 6, 11, 20, 21]
         array_out = self.get_ohe(array, index_symbol)
         array_out, label = int_cleaning(array_out) # on enleve les labels et on convertit en float
