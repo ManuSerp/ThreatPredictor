@@ -8,6 +8,11 @@ Can be safely deleted after running.
 build.sh download the 10% percent dataset.
 Use `-a` option for full dataset
 
+**requirements.txt**
+This file lists all the Python package the project depends on.
+Dependency can be install with `python install -r requirements.txt`
+It is recommanded to use a virutal environment to avoid conflicts with system-wide Python pakcages.
+
 ## Current issue
 
 ACtually I have some issue whoth one hot encoding of the symbolic data

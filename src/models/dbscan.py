@@ -1,10 +1,10 @@
-from sklearn.cluster import KMeans;
+from sklearn.cluster import DBSCAN;
 from models.cluster_model import ClusterModel;
 
-class KMeanModel(ClusterModel):
-    def __init__(self, n_clusters=3, **kwargs):
+class DBSCANModel(ClusterModel):
+    def __init__(self, eps=3, **kwargs):
         super().__init__(**kwargs)
-        self.model = KMeans(n_clusters=n_clusters, **kwargs)
+        self.model = DBSCAN(eps=eps, **kwargs)
 
     def train(self, X):
         print("==== Train begining ====")
@@ -16,3 +16,4 @@ class KMeanModel(ClusterModel):
     
     def evaluating_clustering_performance(self, X, predict_labels):
         return super().evaluating_clustering_performance(X,predict_labels)
+    

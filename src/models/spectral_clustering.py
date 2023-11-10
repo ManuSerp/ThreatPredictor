@@ -1,10 +1,11 @@
-from sklearn.cluster import KMeans;
+import pickle
+from sklearn.cluster import SpectralClustering;
 from models.cluster_model import ClusterModel;
 
-class KMeanModel(ClusterModel):
+class SpectralClusterModel(ClusterModel):
     def __init__(self, n_clusters=3, **kwargs):
         super().__init__(**kwargs)
-        self.model = KMeans(n_clusters=n_clusters, **kwargs)
+        self.model = SpectralClustering(n_clusters=n_clusters, **kwargs)
 
     def train(self, X):
         print("==== Train begining ====")
@@ -14,5 +15,5 @@ class KMeanModel(ClusterModel):
         print("==== Predict begining ====")
         return self.model.fit_predict(X)
     
-    def evaluating_clustering_performance(self, X, predict_labels):
-        return super().evaluating_clustering_performance(X,predict_labels)
+    def evaluating_clustering_performance(self, X, labels_pred):
+        return super().evaluating_clustering_performance(X, labels_pred)
