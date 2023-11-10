@@ -14,9 +14,9 @@ def main():
 
     # # Initialize the Preprocess and KMeansModel classes
     # parser = Parser(PATH_SAVE,LOG_PATH)
-    # # cluster_model = SpectralClusterModel(n_clusters=2, assign_labels='discretize', random_state=0)
-    cluster_model = KMeanModel(n_clusters=10, random_state=0, n_init="auto")
-
+    # cluster_model = SpectralClusterModel(n_clusters=2, assign_labels='discretize', random_state=0)
+    # cluster_model = KMeanModel(n_clusters=10, random_state=0, n_init="auto")
+    cluster_model = DBSCANModel(eps=0.5, min_samples=5)
     # # Load and preprocess data
     with open(LOG_PATH+"sparse.pkl", 'rb') as file:
                 sparse_array,label = pickle.load(file)
