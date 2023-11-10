@@ -2,6 +2,7 @@
 import numpy as np
 from models.spectral_clustering import SpectralClusterModel
 from models.kmean import KMeanModel
+from models.dbscan import DBSCANModel
 from parser.parser import Parser
 
 def main():
@@ -11,7 +12,8 @@ def main():
 
     # Initialize the Preprocess and KMeansModel classes
     parser = Parser(PATH_SAVE,LOG_PATH)
-    cluster_model = KMeanModel(n_clusters=3,random_state=0, n_init="auto")  # Adjust parameters as needed
+    # cluster_model = SpectralClusterModel(n_clusters=2, assign_labels='discretize', random_state=0)
+    cluster_model = DBSCANModel(eps=3, min_samples=2)
 
     # Load and preprocess data
     sparse_array,label = parser.parse_kdd('../data/kddcup.data_10_percent')
@@ -20,13 +22,13 @@ def main():
     # data = parser.one_hot_encode(data, columns=[1, 2, 3])  # Specify the correct columns
 
     # Train the cluster model
-    cluster_model.train(sparse_array)
+    data = cluster_model.train(sparse_array)
+    predict_labels = cluster_model.predict(sparse_array)
 
-    # Make predictions
-    predictions = cluster_model.predict(sparse_array)
+    cluster_model.evaluating_clustering_performance(sparse_array,predict_labels)
 
-    # Output or further process the predictions
-    print(predictions)
+
+
 
 if __name__ == '__main__':
     main()
