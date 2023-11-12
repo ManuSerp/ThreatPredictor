@@ -13,7 +13,12 @@ This file lists all the Python package the project depends on.
 Dependency can be install with `python install -r requirements.txt`
 It is recommanded to use a virutal environment to avoid conflicts with system-wide Python pakcages.
 
+## What is done ?
+- We have a FeatureReduction class which implements TruncatedSVD
+
 ## Current issue
+
+Actually I have some issue with DBSCAN and SpectralClustering which ask to many ressources (eg. RAM and hard disk memory) even if we reduced the number of features.
 
 ACtually I have some issue whoth one hot encoding of the symbolic data
 
