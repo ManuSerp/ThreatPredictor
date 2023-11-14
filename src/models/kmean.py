@@ -5,6 +5,7 @@ class KMeanModel(ClusterModel):
     def __init__(self, n_clusters=3, **kwargs):
         super().__init__(**kwargs)
         self.model = KMeans(n_clusters=n_clusters, **kwargs)
+        self.n_clusters = n_clusters
 
     def train(self, X):
         print("==== Train begining ====")
