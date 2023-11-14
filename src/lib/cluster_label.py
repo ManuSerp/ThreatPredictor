@@ -13,6 +13,7 @@ class ClusterLabel:
         self.label = label
         self.cluster_distribution = None
         self.cluster_label = None
+        self.n_clusters = n_clusters
 
         # unique labels:
         self.unique_label = np.unique(label)
