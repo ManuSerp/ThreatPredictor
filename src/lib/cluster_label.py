@@ -1,6 +1,7 @@
 import numpy as np
 
 
+from tqdm import tqdm
 
 
 
@@ -21,10 +22,10 @@ class ClusterLabel:
 
 
     def cluster_stat(self):
-        for i in range(self.n_clusters):
+        for i in tqdm(range(self.n_clusters)):
             self.cluster_distribution[i] = {label:0 for label in self.unique_label}
 
-        for i in range(len(self.label)):
+        for i in tqdm(range(len(self.label))):
             self.cluster_distribution[self.cluster_affect[i]][self.label[i]] += 1
 
         self.cluster_label = [max(self.cluster_distribution[i], key=self.cluster_distribution[i].get) for i in range(self.n_clusters)]
