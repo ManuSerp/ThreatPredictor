@@ -48,6 +48,7 @@ def main():
     predict_label_test=cluster_model.predict(data_test)
     pl=cluster_label.get_predicted_label(predict_label_test)
     res=cluster_label.calc_stat(label_test,pl)
+    cluster_label.plot(res)
 
     print(res)
 

@@ -1,6 +1,6 @@
 import numpy as np
 
-
+import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 
@@ -49,6 +49,29 @@ class ClusterLabel:
             if label[i] == predict_label[i]:
                 res[label[i]]['correct'] += 1
         return res
+        
+    def plot(self,dict):
+        categories = []
+        accuracies = []
+        for category, values in dict.items():
+            total = values['total']
+            correct = values['correct']
+            accuracy = (correct / total) * 100 if total > 0 else 0
+            categories.append(category)
+            accuracies.append(accuracy)
+
+        # Creating the bar chart
+        plt.figure(figsize=(12, 6))
+        plt.bar(categories, accuracies, color='skyblue')
+        plt.xlabel('Category')
+        plt.ylabel('Accuracy (%)')
+        plt.title('Accuracy of Each Category')
+        plt.xticks(rotation=45)
+        plt.ylim(0, 110)
+        plt.grid(axis='y')
+
+        # Display the plot
+        plt.show()
         
         
 
