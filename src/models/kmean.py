@@ -5,6 +5,7 @@ class KMeanModel(ClusterModel):
     def __init__(self, n_clusters=3, **kwargs):
         super().__init__(**kwargs)
         self.model = KMeans(n_clusters=n_clusters, **kwargs)
+        self.n_clusters = n_clusters
 
     def train(self, X):
         print("==== Train begining ====")
@@ -12,7 +13,7 @@ class KMeanModel(ClusterModel):
 
     def predict(self, X):
         print("==== Predict begining ====")
-        return self.model.fit_predict(X)
+        return self.model.predict(X)
     
     def evaluating_clustering_performance(self, X, predict_labels):
         return super().evaluating_clustering_performance(X,predict_labels)

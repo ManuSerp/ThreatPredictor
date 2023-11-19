@@ -14,6 +14,8 @@ Dependency can be install with `python install -r requirements.txt`
 It is recommanded to use a virutal environment to avoid conflicts with system-wide Python pakcages.
 
 ## What is done ?
+
+- We have parsing with binary encoding of symbolic data
 - We have a FeatureReduction class which implements TruncatedSVD
 
 ## Current issue
@@ -33,3 +35,7 @@ Je vais l'optimiser:
 - Utilisation de sparce matrices. Je vise X100 en reduction de memoire -> respectivment 45MB et 450MB ce qui serait bien acceptable. Meme si on a que x5 en reduction c'est ok.
 
 **_FAIT on est a 100MB _**
+
+- Maybe try SelectKBest with chi2 or f_classif
+
+As we can see in kmean results some attack are very well detected and some are not.
