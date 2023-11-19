@@ -37,3 +37,5 @@ Je vais l'optimiser:
 **_FAIT on est a 100MB _**
 
 - Maybe try SelectKBest with chi2 or f_classif
+
+As we can see in kmean results some attack are very well detected and some are not.
