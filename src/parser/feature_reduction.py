@@ -33,7 +33,7 @@ class FeatureReduction:
             raise ValueError(f"Unknow reduction method: {self.method}")
 
     
-    def plot_variance(self, X, n_components,ratio=0.95):
+    def plot_variance(self, X, n_components,ratio=0.95, v=True):
         """
         Plot the explained variance by each component and the cumulative variance.
         :param X: numpy array of shape (n_samples, n_features)
@@ -65,6 +65,7 @@ class FeatureReduction:
         plt.title('Cumulative Variance Explained')
 
         plt.tight_layout()
-        plt.show()
+        if v:
+            plt.show()
 
         return n_components_ratio

@@ -32,7 +32,24 @@ class ClusterLabel:
         self.cluster_label = [max(self.cluster_distribution[i], key=self.cluster_distribution[i].get) for i in range(self.n_clusters)]
 
         
-
+    def get_predicted_label(self,predict_index):
+        res=[]
+        for i in predict_index:
+            res.append(self.cluster_label[i])
+        return res
+    
+    def calc_stat(self,label,predict_label):
+        res = {}
+        for i in range(len(label)):
+            if label[i] not in res:
+                res[label[i]] = {}
+                res[label[i]]['total'] = 0
+                res[label[i]]['correct'] = 0
+            res[label[i]]['total'] += 1
+            if label[i] == predict_label[i]:
+                res[label[i]]['correct'] += 1
+        return res
+        
         
 
         
