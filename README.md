@@ -39,3 +39,5 @@ Je vais l'optimiser:
 - Maybe try SelectKBest with chi2 or f_classif
 
 As we can see in kmean results some attack are very well detected and some are not.
+
+MAKE CUSTOM TRAIING SET MORE REPRESENTIVE OF THE DIFFERENT ATTACKS BUT WAY SMALLER THAN THE DATASET TO REDUCE COMPUTATION TIME AND MASS RAM USAGE
