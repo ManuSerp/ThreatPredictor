@@ -90,7 +90,13 @@ class Preprocess:
         
         with open(file_path, mode='w', newline='', encoding='utf-8') as file:
             for index in indices_list:
-                file.write(lines[index])
+                try:
+                    file.write(lines[index])
+                except IndexError:
+                    print("\033[93m!!WARNING!!\033[0m") 
+                    print("Index out of range: ", index)
+                    print("Lines length: ", len(lines))
+                    
 
 if __name__ == "__main__":
     DATA_PATH = "../data/kddcup.data"
