@@ -2,7 +2,7 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 
 
 
@@ -20,7 +20,19 @@ class ClusterLabel:
 
         self.cluster_distribution = [{}]*self.n_clusters
         
-
+    """"
+    1. Initialization of Cluster Distribution: 
+       For each cluster, it initializes a dictionary that tracks the count of each unique label present in the cluster. 
+       This is achieved by iterating over the total number of clusters (self.n_clusters) and setting up a dictionary 
+       for each cluster with all unique labels initialized to a count of zero.
+    2. Counting Labels in Each Cluster: 
+       The function then iterates over all the data points (labels) and updates the count of the corresponding label 
+       in the appropriate cluster (as indicated by self.cluster_affect, which holds the cluster assignment for each data point).
+       This step effectively calculates how many times each label occurs in each cluster.
+    
+    The resultant self.cluster_distribution provides view of the label composition of each cluster,
+    while self.cluster_label gives a quick reference to the most characteristic label of each cluster.
+    """
 
     def cluster_stat(self):
         for i in tqdm(range(self.n_clusters)):
@@ -49,25 +61,58 @@ class ClusterLabel:
             if label[i] == predict_label[i]:
                 res[label[i]]['correct'] += 1
         return res
+    
+    """
+    Calculate metrics like precisoin, recall and F1-score, 
+    """
+    def calc_metrics(self, labels, predict_labels):
+        res = {}
+
+        for cluster in self.unique_label: 
+                res[cluster] = {
+                    'precision': precision_score(labels, predict_labels, labels=[cluster], average=None),
+                    # 'recall': recall_score(labels, predict_labels, labels=[cluster], average=None),
+                    'f1_score': f1_score(labels, predict_labels, labels=[cluster], average=None)
+                }
+        return res
         
-    def plot(self,dict):
+    def plot(self,metrics_dict,dict):
         categories = []
         accuracies = []
-        for category, values in dict.items():
-            total = values['total']
-            correct = values['correct']
-            accuracy = (correct / total) * 100 if total > 0 else 0
+        precisions = []
+        recalls = []
+        f1_scores = []
+
+        for category, values in metrics_dict.items():
             categories.append(category)
+            precisions.extend(values['precision'])
+            # recalls.extend(values['recall'])
+            f1_scores.extend(values['f1_score'])
+            total = dict[category]['total']
+            correct = dict[category]['correct']
+            accuracy = correct/total if total > 0 else 0
             accuracies.append(accuracy)
 
         # Creating the bar chart
+        x = np.arange(len(categories))
+        width = 0.2
+
+        print(precisions)
+
         plt.figure(figsize=(12, 6))
-        plt.bar(categories, accuracies, color='skyblue')
+        # plt.bar(x - 1.5*width, precisions, width, label='Precision')
+        # plt.bar(x, - 0.5*width, recalls, label='Recall')
+        # plt.bar(x + 0.5*width, f1_scores, width, label='F1 Score')
+        # plt.bar(x + 1.5*width, accuracies, width, label='Accuracy')
+        plt.bar (x - width, precisions, width, label='Precison')
+        plt.bar(x, f1_scores, width, label='Precision')
+        plt.bar(x + width, accuracies, width, label='Accuracy')
+
         plt.xlabel('Category')
-        plt.ylabel('Accuracy (%)')
-        plt.title('Accuracy of Each Category')
-        plt.xticks(rotation=45)
-        plt.ylim(0, 110)
+        plt.ylabel('Scores (%)')
+        plt.title('Accuracy, Precision and F1 Score for Each Category')
+        plt.xticks(x, categories, rotation=45)
+        plt.ylim(0, 1.1)
         plt.grid(axis='y')
 
         # Display the plot
