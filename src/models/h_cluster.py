@@ -18,23 +18,28 @@ class HClustering(ClusterModel):
 
     def predict(self, X):
         print("==== Predict begining ====")
+        print("computing cluster members")
+        clusters_members= [[] for _ in range(self.n_clusters)]
+        for i in tqdm(range(self.n_clusters)):
+            clusters_members[i] = self.train_data[self.model.labels_ == i]
+        
+
         result = []
         for i in tqdm(range(len(X))):
-            result.append(self.find_closest_cluster(X[i], self.train_data, self.model.labels_))
+            result.append(self.find_closest_cluster(X[i], clusters_members, self.model.labels_))
 
         return result
-    def find_closest_cluster(self,new_data_point, existing_data, clusters):
+    def find_closest_cluster(self,new_data_point, clusters_members, clusters):
    
         min_distance = float('inf')
         closest_cluster = None
 
         # Iterate through each cluster
-        for cluster_label in np.unique(clusters):
+        for cluster_label,c in enumerate(clusters_members):
             # Extract members of this cluster
-            cluster_members = existing_data[clusters == cluster_label]
 
             # Calculate distances from the new data point to each member of the cluster
-            distances = np.linalg.norm(cluster_members - new_data_point, axis=1)
+            distances = np.linalg.norm(c - new_data_point, axis=1)
 
             # Find the minimum distance to this cluster
             cluster_min_distance = np.min(distances)
