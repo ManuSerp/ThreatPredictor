@@ -6,6 +6,7 @@ import math
 import numpy as np
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
+from preprocess import Preprocess
 
 
 def int_to_binary_list(n):
@@ -43,8 +44,18 @@ class Parser:
         self.array = None
         self.tag = ''
     
-    
-    
+    def split_dataset(self, file_name, clustering_length, ratio):
+        preprocess = Preprocess(file_name)
+        preprocess.createLabelContent()  # Assuming this method populates labels_dict
+
+        train_dataset_path = self.path_save + "train_dataset.csv"
+        test_dataset_path = self.path_save + "test_dataset.csv"  
+
+        preprocess.create_train_test_dataset(train_dataset_path, test_dataset_path, clustering_length, ratio)
+
+        # Load the train and test datasets
+        train_data = self.parse_file(train_dataset_path)
+        test_data = self.parse_file(test_dataset_path)    
 
     def parse_file(self,file_name):
         file_path, file_name = os.path.split(file_name)
