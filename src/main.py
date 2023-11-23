@@ -7,31 +7,36 @@ from parser.parser import Parser
 from parser.feature_reduction import FeatureReduction
 from lib.cluster_label import ClusterLabel
 
+def reduction(sparse_array):
+    feature_reduction = FeatureReduction('TruncatedSVD')
+    n_components_ratio = feature_reduction.plot_variance(sparse_array, sparse_array.shape[1], 0.95, v=False)
+    feature_reduction.create_model(n_components_ratio)
+    data = feature_reduction.fit_transform(sparse_array)
+
+    return data
+
 
 def main():
     # Write data variable
     PATH_SAVE="../data/output/temp/"
     LOG_PATH="../data/output/parsing/"
 
-    # Initialize the Preprocess, FeatureReduction and KMeansModel classes
+    
     parser = Parser(PATH_SAVE,LOG_PATH)
-    feature_reduction = FeatureReduction('TruncatedSVD')
     cluster_model = KMeanModel(n_clusters=100, random_state=0)
-    # cluster_model = SpectralClusterModel(n_clusters=2, assign_labels='discretize', random_state=0)
-    # cluster_model = DBSCANModel(eps=3, min_samples=2)
+
+
 
     # Load and preprocess data
-    sparse_array,label = parser.parse_kdd('../data/kddcup.data_10_percent')
-    
-    # Feature reduction
-    n_components_ratio = feature_reduction.plot_variance(sparse_array, sparse_array.shape[1], 0.95, v=False)
-    feature_reduction.create_model(n_components_ratio)
-    data = feature_reduction.fit_transform(sparse_array)
+    s_train,s_test=parser.split_dataset('../data/kddcup.data_10_percent',200000,0.8)
 
-    data_train = data[:int(len(data)*0.8)]
-    data_test = data[int(len(data)*0.8):]
-    label_train = label[:int(len(data)*0.8)]
-    label_test = label[int(len(data)*0.8):]
+    # Feature reduction
+
+    data_train=reduction(s_train[0])
+    data_test=reduction(s_test[0])
+    label_train=s_train[1]
+    label_test=s_test[1]
+    
 
     # Train the cluster model
     # data=sparse_array # remove for feature reduction
