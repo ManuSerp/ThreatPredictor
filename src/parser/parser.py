@@ -6,8 +6,8 @@ import math
 import numpy as np
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
-#from parser.preprocess import Preprocess
-from preprocess import Preprocess
+from parser.preprocess import Preprocess
+#from preprocess import Preprocess
 
 def int_to_binary_list(n):
     if n == 0:
