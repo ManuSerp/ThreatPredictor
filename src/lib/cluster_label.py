@@ -71,7 +71,7 @@ class ClusterLabel:
         for cluster in self.unique_label: 
                 res[cluster] = {
                     'precision': precision_score(labels, predict_labels, labels=[cluster], average=None),
-                    # 'recall': recall_score(labels, predict_labels, labels=[cluster], average=None),
+                    'recall': recall_score(labels, predict_labels, labels=[cluster], average=None),
                     'f1_score': f1_score(labels, predict_labels, labels=[cluster], average=None)
                 }
         return res
@@ -86,7 +86,7 @@ class ClusterLabel:
         for category, values in metrics_dict.items():
             categories.append(category)
             precisions.extend(values['precision'])
-            # recalls.extend(values['recall'])
+            recalls.extend(values['recall'])
             f1_scores.extend(values['f1_score'])
             total = dict[category]['total']
             correct = dict[category]['correct']
@@ -100,13 +100,13 @@ class ClusterLabel:
         print(precisions)
 
         plt.figure(figsize=(12, 6))
-        # plt.bar(x - 1.5*width, precisions, width, label='Precision')
-        # plt.bar(x, - 0.5*width, recalls, label='Recall')
-        # plt.bar(x + 0.5*width, f1_scores, width, label='F1 Score')
-        # plt.bar(x + 1.5*width, accuracies, width, label='Accuracy')
-        plt.bar (x - width, precisions, width, label='Precison')
-        plt.bar(x, f1_scores, width, label='Precision')
-        plt.bar(x + width, accuracies, width, label='Accuracy')
+        plt.bar(x - 1.5*width, precisions, width, label='Precision')
+        plt.bar(x, - 0.5*width, recalls, label='Recall')
+        plt.bar(x + 0.5*width, f1_scores, width, label='F1 Score')
+        plt.bar(x + 1.5*width, accuracies, width, label='Accuracy')
+        # plt.bar (x - width, precisions, width, label='Precison')
+        # plt.bar(x, f1_scores, width, label='F1-scores')
+        # plt.bar(x + width, accuracies, width, label='Accuracy')
 
         plt.xlabel('Category')
         plt.ylabel('Scores (%)')
@@ -114,6 +114,7 @@ class ClusterLabel:
         plt.xticks(x, categories, rotation=45)
         plt.ylim(0, 1.1)
         plt.grid(axis='y')
+        plt.legend()
 
         # Display the plot
         plt.show()
