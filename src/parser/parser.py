@@ -6,8 +6,8 @@ import math
 import numpy as np
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
-from parser.preprocess import Preprocess
-
+#from parser.preprocess import Preprocess
+from preprocess import Preprocess
 
 def int_to_binary_list(n):
     if n == 0:
@@ -25,6 +25,24 @@ def get_unique_value(column_index, array):
         unique_values = np.unique(array[:, i])
         res.append(unique_values)
     return res
+
+def get_frequency_value(column_index, array):
+    #print("Calculating frequency value...")
+    res=[]
+
+
+    
+    u,c = np.unique(array[:, column_index], return_counts=True)
+    sym_l=list(zip(u,c))
+    total=0
+    for sym in sym_l:
+        total+=sym[1]
+    
+    for i,x in enumerate(sym_l):
+        res.append(x[1]/total)
+    return res
+    
+        
 
 def int_cleaning(array):
     label = array[:, -1]
@@ -87,6 +105,28 @@ class Parser:
 
         return array2d
 
+    def frequency_encoding(self,array, index_symbol):
+        unique_values = get_unique_value(index_symbol, array)
+        
+        with open(self.log_path+self.tag+"_fe_log.txt","w") as file:
+            for x, i in enumerate(index_symbol):
+                file.write("Column "+str(i)+" has "+str(len(unique_values[x]))+" unique values.\n")
+                file.write("Unique values are: "+str(unique_values[x])+"\n")
+                file.write("Frequency values are: "+str(get_frequency_value(i,array))+"\n")
+                file.write("\n")
+
+        newarray = array.copy()
+       
+        print("Assigning frequency value...")
+        for id in tqdm(range(len(index_symbol))):
+            freq=get_frequency_value(index_symbol[id],array)
+            for i in range(len(array)):
+                pos=unique_values[id].tolist().index(array[i][index_symbol[id]])
+                newarray[i][index_symbol[id]]=freq[pos]
+        
+        # we now have a frequency encoded array
+        print(newarray[0])
+        return newarray
 
     def one_hot_encode(self,array, index_symbol): 
         unique_values = get_unique_value(index_symbol, array)
@@ -148,9 +188,27 @@ class Parser:
 
 
 ## KDD CUP 99
+    def parse_kdd_freq(self, file_name):
+        print("parsing with freq encoding "+file_name+"...")
+        str_save=self.path_save+"_freq"+self.tag+".pkl"
+        if not os.path.exists(str_save):
+            array = self.parse_file(file_name) # ca ne devrait pasa etre appelé si on a le pkl de ohe
+        else:
+            array=None
+        index_symbol = [1, 2, 3, 6, 11, 20, 21]
+        array_out = self.frequency_encoding(array, index_symbol)
+        array_out, label = int_cleaning(array_out) # on enleve les labels et on convertit en float
+        array_out=self.normalization(array_out) # on normalise
+
+        sparsity = 1.0 - np.count_nonzero(array_out) / array_out.size 
+        print("Sparsity of the array is: ")
+        print(sparsity)
+        sparse_array = csr_matrix(array_out) # sauvegarde as sparse array
+        return sparse_array,label
+    
 
     def parse_kdd(self, file_name):
-        print("parsing "+file_name+"...")
+        print("parsing with binary ohe "+file_name+"...")
         str_save=self.path_save+"_ohe"+self.tag+".pkl"
         if not os.path.exists(str_save):
             array = self.parse_file(file_name) # ca ne devrait pasa etre appelé si on a le pkl de ohe
@@ -172,7 +230,6 @@ if __name__ == '__main__':
     PATH_SAVE="../../data/output/temp/"
     LOG_PATH="../../data/output/parsing/"
     parser=Parser(PATH_SAVE,LOG_PATH)
-    s,l = parser.parse_kdd('../../data/kddcup.data_10_percent')
+    s,l = parser.parse_kdd_freq('../../data/kddcup.data_10_percent')
 
-    with open(LOG_PATH+"sparse.pkl", 'wb') as file:
-        pickle.dump([s,l], file)
+    
