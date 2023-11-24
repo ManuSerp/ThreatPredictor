@@ -41,3 +41,12 @@ Je vais l'optimiser:
 As we can see in kmean results some attack are very well detected and some are not.
 
 MAKE CUSTOM TRAIING SET MORE REPRESENTIVE OF THE DIFFERENT ATTACKS BUT WAY SMALLER THAN THE DATASET TO REDUCE COMPUTATION TIME AND MASS RAM USAGE
+
+
+# To do
+
+kmean no similarity
+
+build results for freq encoding
+
+Try hcluster, mean shift, db scan, spectr, with small set and the 2 encoding to build data.
