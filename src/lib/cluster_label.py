@@ -1,11 +1,10 @@
 import numpy as np
-
+import random
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
-
-
-
+import pandas as pd
+import seaborn as sns
 
 class ClusterLabel:
     def __init__(self,cluster_affect,label,n_clusters):
@@ -33,7 +32,6 @@ class ClusterLabel:
     The resultant self.cluster_distribution provides view of the label composition of each cluster,
     while self.cluster_label gives a quick reference to the most characteristic label of each cluster.
     """
-
     def cluster_stat(self):
         for i in tqdm(range(self.n_clusters)):
             self.cluster_distribution[i] = {label:0 for label in self.unique_label}
@@ -97,20 +95,15 @@ class ClusterLabel:
         x = np.arange(len(categories))
         width = 0.2
 
-        print(precisions)
-
         plt.figure(figsize=(12, 6))
         plt.bar(x - 1.5*width, precisions, width, label='Precision')
         plt.bar(x, - 0.5*width, recalls, label='Recall')
         plt.bar(x + 0.5*width, f1_scores, width, label='F1 Score')
         plt.bar(x + 1.5*width, accuracies, width, label='Accuracy')
-        # plt.bar (x - width, precisions, width, label='Precison')
-        # plt.bar(x, f1_scores, width, label='F1-scores')
-        # plt.bar(x + width, accuracies, width, label='Accuracy')
 
         plt.xlabel('Category')
         plt.ylabel('Scores (%)')
-        plt.title('Accuracy, Precision and F1 Score for Each Category')
+        plt.title('Accuracy, Recall, Precision and F1 Score for Each Category')
         plt.xticks(x, categories, rotation=45)
         plt.ylim(0, 1.1)
         plt.grid(axis='y')
@@ -118,6 +111,34 @@ class ClusterLabel:
 
         # Display the plot
         plt.show()
+    
+    def plot_combined_pairwise(self, data_out, labels, features, sample_size_by_cat):
+        # Check if the sample size is larger than the dataset
+        indices = []
+        if sample_size_by_cat*len(self.unique_label) > len(data_out):
+            indices = [i for i in range(len(data_out))]
+        else :
+            # Randomly sample the data
+            for label in self.unique_label:
+                indices_label = []
+                for i in range(len(labels)):
+                    if (labels[i] == label):
+                        indices_label.append(i)
+                n = min(sample_size_by_cat,len(indices_label))
+                indices_label = random.sample(indices_label,n)
+                indices.extend(indices_label)
+        
+        sampled_data_out = data_out[indices]
+        sampled_labels = labels[indices]
+        df = pd.DataFrame(sampled_data_out, columns=features)
+        df['Cluster'] = sampled_labels
+
+        pairplot = sns.pairplot(df, hue='Cluster', palette='viridis')
+        plt.suptitle('Pairwise Plots of Features with Cluster Labeling (Sampled Data)', y=1.02)
+
+        # Save the plot to a file
+        pairplot.savefig("../data/output/cluster.png")
+        plt.close()
         
         
 
