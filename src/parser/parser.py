@@ -41,6 +41,18 @@ def get_frequency_value(column_index, array):
     for i,x in enumerate(sym_l):
         res.append(x[1]/total)
     return res
+
+def get_target_probability(column_index, array):
+    #print("Calculating target probability...")
+    label_index = array.shape[1] - 1
+    u=np.unique(array[:, column_index])
+    res=[[0,0] for _ in range(len(u))]
+    for i,x in enumerate(array[:, label_index]):
+        res[u.tolist().index(array[i][column_index])][1]+=1
+        if x=="normal.":
+            res[u.tolist().index(array[i][column_index])][0]+=1
+
+    return res
     
         
 
@@ -62,7 +74,7 @@ class Parser:
         self.array = None
         self.tag = ''
     
-    def split_dataset(self, file_name, clustering_length, ratio):
+    def split_dataset(self, file_name, clustering_length, ratio, encoding='ohe'):
         preprocess = Preprocess(file_name)
         preprocess.create_label_content()
 
@@ -72,8 +84,18 @@ class Parser:
         preprocess.create_train_test_dataset(train_dataset_path, test_dataset_path, clustering_length, ratio)
 
         # Load the train and test datasets
-        train_data = self.parse_kdd(train_dataset_path)
-        test_data = self.parse_kdd(test_dataset_path) 
+        if encoding == 'ohe':
+
+            train_data = self.parse_kdd(train_dataset_path)
+            test_data = self.parse_kdd(test_dataset_path) 
+
+        elif encoding == 'freq':
+            train_data = self.parse_kdd_freq(train_dataset_path)
+            test_data = self.parse_kdd_freq(test_dataset_path)
+        elif encoding == 'target':
+            train_data = self.parse_kdd_target(train_dataset_path)
+            test_data = self.parse_kdd_target(test_dataset_path)
+
         return train_data, test_data   
 
     def parse_file(self,file_name):
@@ -125,6 +147,29 @@ class Parser:
                 newarray[i][index_symbol[id]]=freq[pos]
         
         # we now have a frequency encoded array
+        print(newarray[0])
+        return newarray
+
+    def target_encoding(self,array, index_symbol):
+        unique_values = get_unique_value(index_symbol, array)
+        
+        with open(self.log_path+self.tag+"_te_log.txt","w") as file:
+            for x, i in enumerate(index_symbol):
+                file.write("Column "+str(i)+" has "+str(len(unique_values[x]))+" unique values.\n")
+                file.write("Unique values are: "+str(unique_values[x])+"\n")
+                file.write("Target probability values are: "+str(get_target_probability(i,array))+"\n")
+                file.write("\n")
+
+        newarray = array.copy()
+       
+        print("Assigning target probability value...")
+        for id in tqdm(range(len(index_symbol))):
+            prob=get_target_probability(index_symbol[id],array)
+            for i in range(len(array)):
+                pos=unique_values[id].tolist().index(array[i][index_symbol[id]])
+                newarray[i][index_symbol[id]]=1-prob[pos][0]/prob[pos][1]
+        
+        # we now have a target encoded array
         print(newarray[0])
         return newarray
 
@@ -188,6 +233,28 @@ class Parser:
 
 
 ## KDD CUP 99
+
+    def parse_kdd_target(self, file_name):
+        print("parsing with target encoding "+file_name+"...")
+        str_save=self.path_save+"_target"+self.tag+".pkl"
+        if not os.path.exists(str_save):
+            array = self.parse_file(file_name)
+        else:
+            array=None
+        index_symbol = [1, 2, 3, 6, 11, 20, 21]
+        array_out = self.target_encoding(array, index_symbol)
+        array_out, label = int_cleaning(array_out) # on enleve les labels et on convertit en float
+        array_out=self.normalization(array_out) # on normalise
+
+        sparsity = 1.0 - np.count_nonzero(array_out) / array_out.size 
+        print("Sparsity of the array is: ")
+        print(sparsity)
+        sparse_array = csr_matrix(array_out) # sauvegarde as sparse array
+        return sparse_array,label
+        
+
+
+
     def parse_kdd_freq(self, file_name):
         print("parsing with freq encoding "+file_name+"...")
         str_save=self.path_save+"_freq"+self.tag+".pkl"
@@ -230,6 +297,6 @@ if __name__ == '__main__':
     PATH_SAVE="../../data/output/temp/"
     LOG_PATH="../../data/output/parsing/"
     parser=Parser(PATH_SAVE,LOG_PATH)
-    s,l = parser.parse_kdd_freq('../../data/kddcup.data_10_percent')
+    s,l = parser.parse_kdd_target('../../data/kddcup.data_10_percent')
 
     
