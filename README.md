@@ -54,6 +54,8 @@ Faire un rate de normal/pas normal ce qui montrera la capacité a trouver des an
 
 mettre un CNN pour demontrer la baseline de classification
 
+Hyperparameter tuning
+
 Rq1 encodage?
 
 Rq2 model cluster?

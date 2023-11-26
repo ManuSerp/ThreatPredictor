@@ -30,12 +30,12 @@ def main():
 
     
     parser = Parser(PATH_SAVE,LOG_PATH)
-    cluster_model = KMeanModel(n_clusters=100, random_state=0)
+    cluster_model = KMeanModel(n_clusters=50, random_state=0)
 
 
 
     # Load and preprocess data
-    s_train,s_test=parser.split_dataset('../data/kddcup.data_10_percent',200000,0.8, encoding="ohe")
+    s_train,s_test=parser.split_dataset('../data/kddcup.data_10_percent',200000,0.8, encoding="target")
 
     
     # test that the label are the same for train and test set.
