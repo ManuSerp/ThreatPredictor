@@ -31,8 +31,22 @@ def main():
   
 
     # Load and preprocess data
-     # Load and preprocess data
     s_train,s_test=parser.split_dataset('../data/kddcup.data_10_percent',100000,0.8, encoding="target")
+
+    # test that the label are the same for train and test set.
+    test_label=np.unique(s_test[1])
+    try: # lest chech that test label is superior to 5
+        assert len(test_label)>5
+        print(GREEN + "DATASET TEST PASSED" + ENDC)
+    except AssertionError:
+        print(RED + "!!DANGEROUS WARNING!!" + ENDC)
+        print("The label are not the same for train and test set.")
+        print("-------------------------")
+        print("train label:")
+        print(np.unique(s_train[1]))
+        print("test label:")
+        print(np.unique(s_test[1]))
+        print("-------------------------")
 
     # Feature reduction
 
