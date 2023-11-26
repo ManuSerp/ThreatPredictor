@@ -68,6 +68,10 @@ WE MADE CUSTOM TRAIING SET MORE REPRESENTIVE OF THE DIFFERENT ATTACKS BUT WAY SM
 | spy.             | 2      |
 | rootkit.         | 10     |
 
+current results settings:
+kmean: 100 clusters, 200000 samples,
+hcluster: 100 clusters, 50000 samples,
+
 # To do
 
 kmean no similarity
