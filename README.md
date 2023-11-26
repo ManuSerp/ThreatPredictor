@@ -40,7 +40,33 @@ Je vais l'optimiser:
 
 As we can see in kmean results some attack are very well detected and some are not.
 
-MAKE CUSTOM TRAIING SET MORE REPRESENTIVE OF THE DIFFERENT ATTACKS BUT WAY SMALLER THAN THE DATASET TO REDUCE COMPUTATION TIME AND MASS RAM USAGE
+WE MADE CUSTOM TRAIING SET MORE REPRESENTIVE OF THE DIFFERENT ATTACKS BUT WAY SMALLER THAN THE DATASET TO REDUCE COMPUTATION TIME AND MASS RAM USAGE
+
+| Label            | Length |
+| ---------------- | ------ |
+| normal.          | 97278  |
+| buffer_overflow. | 30     |
+| loadmodule.      | 9      |
+| perl.            | 3      |
+| neptune.         | 107201 |
+| smurf.           | 280790 |
+| guess_passwd.    | 53     |
+| pod.             | 264    |
+| teardrop.        | 979    |
+| portsweep.       | 1040   |
+| ipsweep.         | 1247   |
+| land.            | 21     |
+| ftp_write.       | 8      |
+| back.            | 2203   |
+| imap.            | 12     |
+| satan.           | 1589   |
+| phf.             | 4      |
+| nmap.            | 231    |
+| multihop.        | 7      |
+| warezmaster.     | 20     |
+| warezclient.     | 1020   |
+| spy.             | 2      |
+| rootkit.         | 10     |
 
 # To do
 
