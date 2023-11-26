@@ -49,31 +49,92 @@ class ClusterLabel:
             if label[i] == predict_label[i]:
                 res[label[i]]['correct'] += 1
         return res
+
+    def calc_anomaly_ratio(self,label,predict_label):
+        res = {}
+        res["normal."] = {}
+        res["normal."]['total'] = 0
+        res["normal."]['correct'] = 0
+        res["anomaly"] = {}
+        res["anomaly"]['total'] = 0
+        res["anomaly"]['correct'] = 0
+
+        for i in range(len(label)):
+            if label[i] == "normal.":
+                res["normal."]['total'] += 1
+                if label[i] == predict_label[i]:
+                    res["normal."]['correct'] += 1
+            else:
+                res["anomaly"]['total'] += 1
+                if predict_label[i] != "normal.":
+                    res["anomaly"]['correct'] += 1
+    
+        return res
+
         
-    def plot(self,dict):
+    def plot(self, stats_dict):
         categories = []
         accuracies = []
-        for category, values in dict.items():
+        counts = []
+
+        for category, values in stats_dict.items():
             total = values['total']
             correct = values['correct']
             accuracy = (correct / total) * 100 if total > 0 else 0
+
             categories.append(category)
             accuracies.append(accuracy)
+            counts.append(total)
 
-        # Creating the bar chart
+        # Creating the subplot layout
+        fig, axs = plt.subplots(2, 1, figsize=(12, 12))  # Two rows, one column
+
+        # Plotting accuracy
+        axs[0].bar(categories, accuracies, color='skyblue')
+        axs[0].set_xlabel('Category')
+        axs[0].set_ylabel('Accuracy (%)')
+        axs[0].set_title('Accuracy of Each Category')
+        axs[0].set_xticklabels(categories, rotation=45)
+        axs[0].set_ylim(0, 110)
+        axs[0].grid(axis='y')
+
+        # Plotting count
+        axs[1].bar(categories, counts, color='lightgreen')
+        axs[1].set_xlabel('Category')
+        axs[1].set_ylabel('Count')
+        axs[1].set_title('Count of Each Category')
+        axs[1].set_xticklabels(categories, rotation=45)
+        axs[1].set_ylim(0, max(counts) + 10)  # Adjust the y-axis limit
+        axs[1].grid(axis='y')
+
+        # Display the plot
+        plt.tight_layout()
+        plt.show()
+
+    def plot_anomaly_ratio(self, anomaly_ratio):
+        categories = []
+        ratios = []
+
+        for category, dic in anomaly_ratio.items():
+            # Calculate the ratio
+            ratio = dic['correct'] / dic['total'] if dic['total'] > 0 else 0
+            ratio=ratio*100
+            print(f"Anomaly detection analysis:\n{category}: {ratio:.2f}%")
+            categories.append(category)
+            ratios.append(ratio)
+
+        # Create the bar chart
         plt.figure(figsize=(12, 6))
-        plt.bar(categories, accuracies, color='skyblue')
+        plt.bar(categories, ratios, color='purple')
         plt.xlabel('Category')
-        plt.ylabel('Accuracy (%)')
-        plt.title('Accuracy of Each Category')
+        plt.ylabel('Anomaly Ratio')
+        plt.title('Anomaly Ratio by Category')
         plt.xticks(rotation=45)
-        plt.ylim(0, 110)
+        plt.ylim(0, 100)  # Ratio is between 0 and 1
         plt.grid(axis='y')
 
         # Display the plot
-        plt.show()
-        
-        
+            
 
         
 
