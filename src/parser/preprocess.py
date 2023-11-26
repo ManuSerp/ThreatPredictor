@@ -29,7 +29,6 @@ class Preprocess:
         max_label_length = max(len(label) for label in self.labels_dict.keys())
         print(f"{'Label'.ljust(max_label_length)} | {'Length'}")
         print(f"{'-' * max_label_length} | {'-' * 6}")
-
         for label, list in self.labels_dict.items():
             print(f"{label.ljust(max_label_length)} | {len(list)}")
 
@@ -62,8 +61,17 @@ class Preprocess:
             test_len_by_label = (1-ratio) * len_by_label
 
             # Calculate the number of items to include in train and test for this label
-            num_train = min(len(data_list), int(train_len_by_label))
-            num_test = min(len(data_list) - num_train, int(test_len_by_label))
+            # If modified the code. Indeed the previous code was not working when there was not enough data for a label
+            # In this case the num_test was 0 so the test set was not representative
+            # My patch make sure the ratio between train and test is respected even if there is not enough data
+            data_list_length = len(data_list)
+            if data_list_length < int(train_len_by_label) + int(test_len_by_label):
+                train_len_by_label = data_list_length * ratio
+                test_len_by_label = data_list_length * (1-ratio)
+               
+            num_train = int(train_len_by_label)
+            num_test = int(test_len_by_label)
+            #print(f"{label} : {num_train} + {num_test} = {num_train + num_test}")
 
             # Split the list into training and testing
             train_indices.extend(shuffled_list[:num_train])
@@ -74,7 +82,8 @@ class Preprocess:
             remaining_labels -= 1
             len_by_label = remaining_length / remaining_labels if remaining_labels > 0 else 0
 
-            # Correct  arround division error with the last label to have exactly length_clustering data
+            # Correct  arround division error with the last label to have exactly length_clustering data 
+            # THE WARNING EXCEPTION PROBABLY COMES FROM HERE
             last_indix = num_train + num_test
             while (remaining_labels == 0) and (len(train_indices) + len(test_indices) < clustering_length):
                 remaining_ratio = len(train_indices) / (len(train_indices) + len(test_indices))
@@ -83,7 +92,7 @@ class Preprocess:
                 else:
                     train_indices.extend(shuffled_list[last_indix:last_indix+1])
         
-        print(len(test_indices), "+", len(train_indices),"=",len(train_indices)+len(test_indices))
+        print(len(train_indices), "+", len(test_indices),"=",len(train_indices)+len(test_indices))
 
         self._write_dataset_to_csv(train_indices, train_dataset_path)
         self._write_dataset_to_csv(test_indices, test_dataset_path)
