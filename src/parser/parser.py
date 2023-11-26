@@ -240,8 +240,7 @@ class Parser:
         else:
             array=None
         index_symbol = [1, 2, 3, 6, 11, 20, 21]
-        print("LABEL 2 "+file_name)
-        print(np.unique(array[:,-1]))
+        
         array_out = self.target_encoding(array, index_symbol)
         array_out, label = int_cleaning(array_out) # on enleve les labels et on convertit en float
         array_out=self.normalization(array_out) # on normalise
