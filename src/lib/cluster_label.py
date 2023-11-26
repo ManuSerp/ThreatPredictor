@@ -1,11 +1,10 @@
 import numpy as np
-
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
-
-
-
+import pandas as pd
+import random
+import seaborn as sns
 
 class ClusterLabel:
     def __init__(self,cluster_affect,label,n_clusters):
@@ -61,7 +60,7 @@ class ClusterLabel:
             if label[i] == predict_label[i]:
                 res[label[i]]['correct'] += 1
         return res
-    
+            
     """
     Calculate metrics like precisoin, recall and F1-score, 
     """
@@ -71,12 +70,12 @@ class ClusterLabel:
         for cluster in self.unique_label: 
                 res[cluster] = {
                     'precision': precision_score(labels, predict_labels, labels=[cluster], average=None),
-                    # 'recall': recall_score(labels, predict_labels, labels=[cluster], average=None),
+                    'recall': recall_score(labels, predict_labels, labels=[cluster], average=None),
                     'f1_score': f1_score(labels, predict_labels, labels=[cluster], average=None)
                 }
         return res
         
-    def plot(self,metrics_dict,dict):
+    def plot_metrics(self,metrics_dict,dict):
         categories = []
         accuracies = []
         precisions = []
@@ -86,39 +85,147 @@ class ClusterLabel:
         for category, values in metrics_dict.items():
             categories.append(category)
             precisions.extend(values['precision'])
-            # recalls.extend(values['recall'])
+            recalls.extend(values['recall'])
             f1_scores.extend(values['f1_score'])
-            total = dict[category]['total']
-            correct = dict[category]['correct']
-            accuracy = correct/total if total > 0 else 0
+            if (category in dict):
+                total = dict[category]['total']
+                correct = dict[category]['correct']
+                accuracy = correct/total if total > 0 else 0
+            else:
+                accuracy = -0.1
             accuracies.append(accuracy)
 
         # Creating the bar chart
         x = np.arange(len(categories))
         width = 0.2
 
-        print(precisions)
-
         plt.figure(figsize=(12, 6))
-        # plt.bar(x - 1.5*width, precisions, width, label='Precision')
-        # plt.bar(x, - 0.5*width, recalls, label='Recall')
-        # plt.bar(x + 0.5*width, f1_scores, width, label='F1 Score')
-        # plt.bar(x + 1.5*width, accuracies, width, label='Accuracy')
-        plt.bar (x - width, precisions, width, label='Precison')
-        plt.bar(x, f1_scores, width, label='Precision')
-        plt.bar(x + width, accuracies, width, label='Accuracy')
+        plt.bar(x - 1.5*width, precisions, width, label='Precision')
+        plt.bar(x, - 0.5*width, recalls, label='Recall')
+        plt.bar(x + 0.5*width, f1_scores, width, label='F1 Score')
+        plt.bar(x + 1.5*width, accuracies, width, label='Accuracy')
 
         plt.xlabel('Category')
         plt.ylabel('Scores (%)')
-        plt.title('Accuracy, Precision and F1 Score for Each Category')
+        plt.title('Accuracy, Recall, Precision and F1 Score for Each Category')
         plt.xticks(x, categories, rotation=45)
-        plt.ylim(0, 1.1)
+        plt.ylim(-0.1, 1.1)
         plt.grid(axis='y')
+        plt.legend()
 
         # Display the plot
         plt.show()
+
+
+    def calc_anomaly_ratio(self,label,predict_label):
+        res = {}
+        res["normal."] = {}
+        res["normal."]['total'] = 0
+        res["normal."]['correct'] = 0
+        res["anomaly"] = {}
+        res["anomaly"]['total'] = 0
+        res["anomaly"]['correct'] = 0
+
+        for i in range(len(label)):
+            if label[i] == "normal.":
+                res["normal."]['total'] += 1
+                if label[i] == predict_label[i]:
+                    res["normal."]['correct'] += 1
+            else:
+                res["anomaly"]['total'] += 1
+                if predict_label[i] != "normal.":
+                    res["anomaly"]['correct'] += 1
+    
+        return res
+    
+    def plot(self, stats_dict):
+        categories = []
+        accuracies = []
+        counts = []
+        for category, values in stats_dict.items():
+            total = values['total']
+            correct = values['correct']
+            accuracy = (correct / total) * 100 if total > 0 else 0
+
+            categories.append(category)
+            accuracies.append(accuracy)
+            counts.append(total)
+
+        # Creating the subplot layout
+        fig, axs = plt.subplots(2, 1, figsize=(12, 12))  # Two rows, one column
+
+        # Plotting accuracy
+        axs[0].bar(categories, accuracies, color='skyblue')
+        axs[0].set_xlabel('Category')
+        axs[0].set_ylabel('Accuracy (%)')
+        axs[0].set_title('Accuracy of Each Category')
+        axs[0].set_xticklabels(categories, rotation=45)
+        axs[0].set_ylim(0, 110)
+        axs[0].grid(axis='y')
+
+        # Plotting count
+        axs[1].bar(categories, counts, color='lightgreen')
+        axs[1].set_xlabel('Category')
+        axs[1].set_ylabel('Count')
+        axs[1].set_title('Count of Each Category')
+        axs[1].set_xticklabels(categories, rotation=45)
+        axs[1].set_ylim(0, max(counts) + 10)  # Adjust the y-axis limit
+        axs[1].grid(axis='y')
+
+        # Display the plot
+        plt.tight_layout()
+        plt.show()
+
+    def plot_anomaly_ratio(self, anomaly_ratio):
+        categories = []
+        ratios = []
+
+        for category, dic in anomaly_ratio.items():
+            # Calculate the ratio
+            ratio = dic['correct'] / dic['total'] if dic['total'] > 0 else 0
+            ratio=ratio*100
+            print(f"Anomaly detection analysis:\n{category}: {ratio:.2f}%")
+            categories.append(category)
+            ratios.append(ratio)
+
+        # Create the bar chart
+        plt.figure(figsize=(12, 6))
+        plt.bar(categories, ratios, color='purple')
+        plt.xlabel('Category')
+        plt.ylabel('Anomaly Ratio')
+        plt.title('Anomaly Ratio by Category')
+        plt.xticks(rotation=45)
+        plt.ylim(0, 100)  # Ratio is between 0 and 1
+        plt.grid(axis='y')
+
+    def plot_combined_pairwise(self, data_out, labels, features, sample_size_by_cat, save_path):
+        # Check if the sample size is larger than the dataset
+        indices = []
+        if sample_size_by_cat*len(self.unique_label) > len(data_out):
+            indices = [i for i in range(len(data_out))]
+        else :
+            # Randomly sample the data
+            for label in self.unique_label:
+                indices_label = []
+                for i in range(len(labels)):
+                    if (labels[i] == label):
+                        indices_label.append(i)
+                n = min(sample_size_by_cat,len(indices_label))
+                indices_label = random.sample(indices_label,n)
+                indices.extend(indices_label)
         
-        
+        sampled_data_out = data_out[indices]
+        sampled_labels = labels[indices]
+        df = pd.DataFrame(sampled_data_out, columns=features)
+        df['Cluster'] = sampled_labels
+
+        pairplot = sns.pairplot(df, hue='Cluster', palette='viridis')
+        plt.suptitle('Pairwise Plots of Features with Cluster Labeling (Sampled Data)', y=1.02)
+
+        # Save the plot to a file
+        pairplot.savefig(save_path)
+        plt.close()
+            
 
         
 

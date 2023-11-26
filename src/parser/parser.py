@@ -7,7 +7,7 @@ import numpy as np
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
 from parser.preprocess import Preprocess
-
+#from preprocess import Preprocess
 
 def int_to_binary_list(n):
     if n == 0:
@@ -26,12 +26,41 @@ def get_unique_value(column_index, array):
         res.append(unique_values)
     return res
 
+def get_frequency_value(column_index, array):
+    #print("Calculating frequency value...")
+    res=[]
+
+
+    
+    u,c = np.unique(array[:, column_index], return_counts=True)
+    sym_l=list(zip(u,c))
+    total=0
+    for sym in sym_l:
+        total+=sym[1]
+    
+    for i,x in enumerate(sym_l):
+        res.append(x[1]/total)
+    return res
+
+def get_target_probability(column_index, array):
+    #print("Calculating target probability...")
+    label_index = array.shape[1] - 1
+    u=np.unique(array[:, column_index])
+    res=[[0,0] for _ in range(len(u))]
+    for i,x in enumerate(array[:, label_index]):
+        res[u.tolist().index(array[i][column_index])][1]+=1
+        if x=="normal.":
+            res[u.tolist().index(array[i][column_index])][0]+=1
+
+    return res
+    
+        
+
 def int_cleaning(array):
     label = array[:, -1]
     array = array[:, :-1]
 
     array=array.astype(np.float64)
-    print(array.dtype)
     return array, label
 
 
@@ -44,9 +73,10 @@ class Parser:
         self.array = None
         self.tag = ''
     
-    def split_dataset(self, file_name, clustering_length, ratio):
+    def split_dataset(self, file_name, clustering_length, ratio, encoding='ohe'):
         preprocess = Preprocess(file_name)
         preprocess.create_label_content()
+        preprocess.print_labels_dict()
 
         train_dataset_path = self.path_save + "train_dataset.csv"
         test_dataset_path = self.path_save + "test_dataset.csv"  
@@ -54,8 +84,19 @@ class Parser:
         preprocess.create_train_test_dataset(train_dataset_path, test_dataset_path, clustering_length, ratio)
 
         # Load the train and test datasets
-        train_data = self.parse_kdd(train_dataset_path)
-        test_data = self.parse_kdd(test_dataset_path) 
+        if encoding == 'ohe':
+
+            train_data = self.parse_kdd(train_dataset_path)
+            test_data = self.parse_kdd(test_dataset_path) 
+        
+        elif encoding == 'freq':
+            train_data = self.parse_kdd_freq(train_dataset_path)
+            test_data = self.parse_kdd_freq(test_dataset_path)
+        elif encoding == 'target':
+            train_data = self.parse_kdd_target(train_dataset_path)
+            test_data = self.parse_kdd_target(test_dataset_path)
+         
+
         return train_data, test_data   
 
     def parse_file(self,file_name):
@@ -87,6 +128,48 @@ class Parser:
 
         return array2d
 
+    def frequency_encoding(self,array, index_symbol):
+        unique_values = get_unique_value(index_symbol, array)
+        
+        with open(self.log_path+self.tag+"_fe_log.txt","w") as file:
+            for x, i in enumerate(index_symbol):
+                file.write("Column "+str(i)+" has "+str(len(unique_values[x]))+" unique values.\n")
+                file.write("Unique values are: "+str(unique_values[x])+"\n")
+                file.write("Frequency values are: "+str(get_frequency_value(i,array))+"\n")
+                file.write("\n")
+
+        newarray = array.copy()
+       
+        print("Assigning frequency value...")
+        for id in tqdm(range(len(index_symbol))):
+            freq=get_frequency_value(index_symbol[id],array)
+            for i in range(len(array)):
+                pos=unique_values[id].tolist().index(array[i][index_symbol[id]])
+                newarray[i][index_symbol[id]]=freq[pos]
+        
+        # we now have a frequency encoded array
+        return newarray
+
+    def target_encoding(self,array, index_symbol):
+        unique_values = get_unique_value(index_symbol, array)
+        
+        with open(self.log_path+self.tag+"_te_log.txt","w") as file:
+            for x, i in enumerate(index_symbol):
+                file.write("Column "+str(i)+" has "+str(len(unique_values[x]))+" unique values.\n")
+                file.write("Unique values are: "+str(unique_values[x])+"\n")
+                file.write("Target probability values are: "+str(get_target_probability(i,array))+"\n")
+                file.write("\n")
+
+        newarray = array.copy()
+        print("Assigning target probability value...")
+        for id in tqdm(range(len(index_symbol))):
+            prob=get_target_probability(index_symbol[id],array)
+            for i in range(len(array)):
+                pos=unique_values[id].tolist().index(array[i][index_symbol[id]])
+                newarray[i][index_symbol[id]]=1-prob[pos][0]/prob[pos][1]
+        
+        # we now have a target encoded array
+        return newarray
 
     def one_hot_encode(self,array, index_symbol): 
         unique_values = get_unique_value(index_symbol, array)
@@ -117,22 +200,22 @@ class Parser:
         # we now have a one hot encoded array binary
         return newarray
 
-    def get_ohe(self,array, index_symbol): 
-
-        str_save=self.path_save+"_ohe"+self.tag+".pkl"
+    def get_ohe(self,array, index_symbol,name): 
+        name=name.split("/")[-1]
+        str_save=self.path_save+"_ohe_"+name+".pkl"
         if os.path.exists(str_save):
             print("Ohe File detected!")
             # File exists, so load the data from the file
             with open(str_save, 'rb') as file:
                 array_out = pickle.load(file)
-            print("Ohe "+self.path_save+"ohe"+self.tag+".pkl"+"exists. Data has been loaded.")
+            print("Ohe "+self.path_save+"ohe_"+name+".pkl"+"exists. Data has been loaded.")
 
         else:
             print("Ohe File not detected! building it...")
             array_out=self.one_hot_encode(array, index_symbol)
             with open(str_save, 'wb') as file:
                 pickle.dump(array_out,file)
-            print("Ohe "+self.path_save+"ohe"+self.tag+".pkl"+"does not exist. Data has been saved.")
+            print("Ohe "+self.path_save+"ohe_"+name+".pkl"+"does not exist. Data has been saved.")
 
         
         return array_out   
@@ -149,15 +232,57 @@ class Parser:
 
 ## KDD CUP 99
 
+    def parse_kdd_target(self, file_name):
+        print("parsing with target encoding "+file_name+"...")
+        str_save=self.path_save+"_target"+self.tag+".pkl"
+        if not os.path.exists(str_save):
+            array = self.parse_file(file_name)
+
+        else:
+            array=None
+        index_symbol = [1, 2, 3, 6, 11, 20, 21]
+        
+        array_out = self.target_encoding(array, index_symbol)
+        array_out, label = int_cleaning(array_out) # on enleve les labels et on convertit en float
+        array_out=self.normalization(array_out) # on normalise
+
+        sparsity = 1.0 - np.count_nonzero(array_out) / array_out.size 
+        print("Sparsity of the array is: ")
+        print(sparsity)
+        sparse_array = csr_matrix(array_out) # sauvegarde as sparse array
+        return sparse_array,label
+        
+
+
+
+    def parse_kdd_freq(self, file_name):
+        print("parsing with freq encoding "+file_name+"...")
+        str_save=self.path_save+"_freq"+self.tag+".pkl"
+        if not os.path.exists(str_save):
+            array = self.parse_file(file_name) # ca ne devrait pasa etre appelé si on a le pkl de ohe
+        else:
+            array=None
+        index_symbol = [1, 2, 3, 6, 11, 20, 21]
+        array_out = self.frequency_encoding(array, index_symbol)
+        array_out, label = int_cleaning(array_out) # on enleve les labels et on convertit en float
+        array_out=self.normalization(array_out) # on normalise
+
+        sparsity = 1.0 - np.count_nonzero(array_out) / array_out.size 
+        print("Sparsity of the array is: ")
+        print(sparsity)
+        sparse_array = csr_matrix(array_out) # sauvegarde as sparse array
+        return sparse_array,label
+    
+
     def parse_kdd(self, file_name):
-        print("parsing "+file_name+"...")
+        print("parsing with binary ohe "+file_name+"...")
         str_save=self.path_save+"_ohe"+self.tag+".pkl"
         if not os.path.exists(str_save):
             array = self.parse_file(file_name) # ca ne devrait pasa etre appelé si on a le pkl de ohe
         else:
             array=None
         index_symbol = [1, 2, 3, 6, 11, 20, 21]
-        array_out = self.get_ohe(array, index_symbol)
+        array_out = self.get_ohe(array, index_symbol,file_name)
         array_out, label = int_cleaning(array_out) # on enleve les labels et on convertit en float
         array_out=self.normalization(array_out) # on normalise
 
@@ -172,7 +297,6 @@ if __name__ == '__main__':
     PATH_SAVE="../../data/output/temp/"
     LOG_PATH="../../data/output/parsing/"
     parser=Parser(PATH_SAVE,LOG_PATH)
-    s,l = parser.parse_kdd('../../data/kddcup.data_10_percent')
+    s,l = parser.parse_kdd_target('../../data/kddcup.data_10_percent')
 
-    with open(LOG_PATH+"sparse.pkl", 'wb') as file:
-        pickle.dump([s,l], file)
+    

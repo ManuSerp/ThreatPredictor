@@ -1,21 +1,17 @@
 """Main code"""
 import numpy as np
-import pickle
-import os
 from models.spectral_clustering import SpectralClusterModel
-from models.mean_shift import MeanShiftModel
 from models.kmean import KMeanModel
-from models.h_cluster import HClustering
 from models.dbscan import DBSCANModel
 from parser.parser import Parser
 from parser.feature_reduction import FeatureReduction
 from lib.cluster_label import ClusterLabel
 
+
 # ANSI escape codes for colors
 RED = '\033[91m'
 GREEN = '\033[92m'
 ENDC = '\033[0m' 
-
 
 def reduction(sparse_array,n_components_ratio=None):
     feature_reduction = FeatureReduction('TruncatedSVD')
@@ -23,6 +19,7 @@ def reduction(sparse_array,n_components_ratio=None):
         n_components_ratio = feature_reduction.plot_variance(sparse_array, sparse_array.shape[1], 0.95, v=False)
     feature_reduction.create_model(n_components_ratio)
     data = feature_reduction.fit_transform(sparse_array)
+
     # feature_names = ["duration", "protocol_type0", "protocol_type1", "service0", "service1", "service2", "service3", "service4", "service5", "service6", "flag0", "flag1", "flag2", "flag3", "src_bytes", "dst_bytes", "land", "wrong_fragment", "urgent", "hot", "num_failed_logins", "logged_in", "num_compromised", "root_shell", "su_attempted", "num_root", "num_file_creations", "num_shells", "num_access_files", "num_outbound_cmds", "is_guest_login", "count", "srv_count", "serror_rate", "srv_serror_rate", "rerror_rate", "srv_rerror_rate", "same_srv_rate", "diff_srv_rate", "srv_diff_host_rate", "dst_host_count", "dst_host_srv_count", "dst_host_same_srv_rate", "dst_host_diff_srv_rate", "dst_host_same_src_port_rate", "dst_host_srv_diff_host_rate", "dst_host_serror_rate", "dst_host_srv_serror_rate", "dst_host_rerror_rate"]
     feature_names = list(range(1,42))
     components = feature_reduction.model.get_feature_names_out(feature_names)
@@ -31,19 +28,22 @@ def reduction(sparse_array,n_components_ratio=None):
 
     return data,n_components_ratio, top_features
 
+
 def main():
     # Write data variable
     PATH_SAVE="../data/output/temp/"
     LOG_PATH="../data/output/parsing/"
 
+    
     parser = Parser(PATH_SAVE,LOG_PATH)
+    cluster_model = KMeanModel(n_clusters=100, random_state=0)
 
-    cluster_model = HClustering(n_clusters=100)
-  
+
 
     # Load and preprocess data
-    s_train,s_test=parser.split_dataset('../data/kddcup.data_10_percent',50000,0.8, encoding="freq")
+    s_train,s_test=parser.split_dataset('../data/kddcup.data_10_percent',200000,0.8, encoding="target")
 
+    
     # test that the label are the same for train and test set.
     test_label=np.unique(s_test[1])
     try: # lest chech that test label is superior to 5
@@ -58,7 +58,7 @@ def main():
         print("test label:")
         print(np.unique(s_test[1]))
         print("-------------------------")
-
+    
     # Feature reduction
     data_train,n,features=reduction(s_train[0])
     data_test,n,features=reduction(s_test[0],n)
@@ -67,28 +67,10 @@ def main():
 
     # Train the cluster model
     # data=sparse_array # remove for feature reduction
+    data_out = cluster_model.train(data_train)
+    predict_labels_train = cluster_model.predict(data_train)
 
-    if os.path.exists(PATH_SAVE+"hcluster.pkl"):
-            # File exists, so load the data from the file
-            with open(PATH_SAVE+"hcluster.pkl", 'rb') as file:
-                save = pickle.load(file)
-                cluster_model = save[0]
-                predict_labels_train = save[1]
-
-            print("File exists. Data has been loaded.")
-    else:
-            predict_labels_train=cluster_model.train(data_train)
-            to_save = [cluster_model, predict_labels_train]
-            with open(PATH_SAVE+"hcluster.pkl", 'wb') as file:
-                pickle.dump(to_save, file)
-            print("File does not exist. Data has been saved.")
-
-
-     
-
-    #cluster_model.evaluating_clustering_performance(data_out,predict_labels_train)
-    predict_labels_train=cluster_model.model.labels_
-
+    cluster_model.evaluating_clustering_performance(data_out,predict_labels_train)
 
     # Cluster label
     print("==== Cluster label begining ====")
@@ -104,11 +86,7 @@ def main():
     res_accuracy=cluster_label.calc_stat(label_test,pl)
     res_metrics=cluster_label.calc_metrics(label_test,pl)
     # cluster_label.plot_metrics(res_metrics,res_accuracy)
-    cluster_label.plot_combined_pairwise(data_train,label_train,features,20,"../results/hcluster/cluster.png")
-
-
-    # print(res)
-
+    cluster_label.plot_combined_pairwise(data_train,label_train,features,20,"../results/kmean/cluster.png")
 
 if __name__ == '__main__':
     main()
