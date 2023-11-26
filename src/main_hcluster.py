@@ -93,8 +93,13 @@ def main():
     cluster_label.cluster_stat()
     predict_label_test=cluster_model.predict(data_test)
     pl=cluster_label.get_predicted_label(predict_label_test)
+    #pl=cluster_label.get_predicted_label(predict_labels_train)
+    
     res=cluster_label.calc_stat(label_test,pl)
+    #res=cluster_label.calc_stat(label_train,pl)
+    
     anomaly_ratio = cluster_label.calc_anomaly_ratio(label_test,pl)
+    #anomaly_ratio = cluster_label.calc_anomaly_ratio(label_train,pl)
     cluster_label.plot_anomaly_ratio(anomaly_ratio)
     cluster_label.plot(res)
 
