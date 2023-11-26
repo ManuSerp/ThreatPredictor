@@ -31,7 +31,7 @@ def main():
 
     # Load and preprocess data
      # Load and preprocess data
-    s_train,s_test=parser.split_dataset('../data/kddcup.data_10_percent',100000,0.8)
+    s_train,s_test=parser.split_dataset('../data/kddcup.data_10_percent',100000,0.8, encoding="target")
 
     # Feature reduction
 

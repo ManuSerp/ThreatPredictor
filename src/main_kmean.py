@@ -7,13 +7,14 @@ from parser.parser import Parser
 from parser.feature_reduction import FeatureReduction
 from lib.cluster_label import ClusterLabel
 
-def reduction(sparse_array):
+def reduction(sparse_array,n_components_ratio=None):
     feature_reduction = FeatureReduction('TruncatedSVD')
-    n_components_ratio = feature_reduction.plot_variance(sparse_array, sparse_array.shape[1], 0.95, v=False)
+    if n_components_ratio is None:
+        n_components_ratio = feature_reduction.plot_variance(sparse_array, sparse_array.shape[1], 0.95, v=False)
     feature_reduction.create_model(n_components_ratio)
     data = feature_reduction.fit_transform(sparse_array)
 
-    return data
+    return data,n_components_ratio
 
 
 def main():
@@ -28,15 +29,19 @@ def main():
 
 
     # Load and preprocess data
-    s_train,s_test=parser.split_dataset('../data/kddcup.data_10_percent',200000,0.8)
-
+    s_train,s_test=parser.split_dataset('../data/kddcup.data_10_percent',200000,0.8, encoding="ohe")
+    print("-------------------------")
+    print("train label:")
+    print(np.unique(s_train[1]))
+    print("test label:")
+    print(np.unique(s_test[1]))
+    print("-------------------------")
     # Feature reduction
 
-    data_train=reduction(s_train[0])
-    data_test=reduction(s_test[0])
+    data_train,n=reduction(s_train[0])
+    data_test,n=reduction(s_test[0],n)
     label_train=s_train[1]
     label_test=s_test[1]
-    
 
     # Train the cluster model
     # data=sparse_array # remove for feature reduction

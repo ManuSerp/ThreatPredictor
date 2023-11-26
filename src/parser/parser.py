@@ -61,7 +61,6 @@ def int_cleaning(array):
     array = array[:, :-1]
 
     array=array.astype(np.float64)
-    print(array.dtype)
     return array, label
 
 
@@ -88,13 +87,14 @@ class Parser:
 
             train_data = self.parse_kdd(train_dataset_path)
             test_data = self.parse_kdd(test_dataset_path) 
-
+        
         elif encoding == 'freq':
             train_data = self.parse_kdd_freq(train_dataset_path)
             test_data = self.parse_kdd_freq(test_dataset_path)
         elif encoding == 'target':
             train_data = self.parse_kdd_target(train_dataset_path)
             test_data = self.parse_kdd_target(test_dataset_path)
+         
 
         return train_data, test_data   
 
@@ -147,7 +147,6 @@ class Parser:
                 newarray[i][index_symbol[id]]=freq[pos]
         
         # we now have a frequency encoded array
-        print(newarray[0])
         return newarray
 
     def target_encoding(self,array, index_symbol):
@@ -161,7 +160,6 @@ class Parser:
                 file.write("\n")
 
         newarray = array.copy()
-       
         print("Assigning target probability value...")
         for id in tqdm(range(len(index_symbol))):
             prob=get_target_probability(index_symbol[id],array)
@@ -170,7 +168,6 @@ class Parser:
                 newarray[i][index_symbol[id]]=1-prob[pos][0]/prob[pos][1]
         
         # we now have a target encoded array
-        print(newarray[0])
         return newarray
 
     def one_hot_encode(self,array, index_symbol): 
@@ -202,22 +199,22 @@ class Parser:
         # we now have a one hot encoded array binary
         return newarray
 
-    def get_ohe(self,array, index_symbol): 
-
-        str_save=self.path_save+"_ohe"+self.tag+".pkl"
+    def get_ohe(self,array, index_symbol,name): 
+        name=name.split("/")[-1]
+        str_save=self.path_save+"_ohe_"+name+".pkl"
         if os.path.exists(str_save):
             print("Ohe File detected!")
             # File exists, so load the data from the file
             with open(str_save, 'rb') as file:
                 array_out = pickle.load(file)
-            print("Ohe "+self.path_save+"ohe"+self.tag+".pkl"+"exists. Data has been loaded.")
+            print("Ohe "+self.path_save+"ohe_"+name+".pkl"+"exists. Data has been loaded.")
 
         else:
             print("Ohe File not detected! building it...")
             array_out=self.one_hot_encode(array, index_symbol)
             with open(str_save, 'wb') as file:
                 pickle.dump(array_out,file)
-            print("Ohe "+self.path_save+"ohe"+self.tag+".pkl"+"does not exist. Data has been saved.")
+            print("Ohe "+self.path_save+"ohe_"+name+".pkl"+"does not exist. Data has been saved.")
 
         
         return array_out   
@@ -239,9 +236,12 @@ class Parser:
         str_save=self.path_save+"_target"+self.tag+".pkl"
         if not os.path.exists(str_save):
             array = self.parse_file(file_name)
+
         else:
             array=None
         index_symbol = [1, 2, 3, 6, 11, 20, 21]
+        print("LABEL 2 "+file_name)
+        print(np.unique(array[:,-1]))
         array_out = self.target_encoding(array, index_symbol)
         array_out, label = int_cleaning(array_out) # on enleve les labels et on convertit en float
         array_out=self.normalization(array_out) # on normalise
@@ -282,7 +282,7 @@ class Parser:
         else:
             array=None
         index_symbol = [1, 2, 3, 6, 11, 20, 21]
-        array_out = self.get_ohe(array, index_symbol)
+        array_out = self.get_ohe(array, index_symbol,file_name)
         array_out, label = int_cleaning(array_out) # on enleve les labels et on convertit en float
         array_out=self.normalization(array_out) # on normalise
 
