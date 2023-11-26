@@ -37,7 +37,7 @@ def main():
   
 
     # Load and preprocess data
-    s_train,s_test=parser.split_dataset('../data/kddcup.data_10_percent',50000,0.8, encoding="target")
+    s_train,s_test=parser.split_dataset('../data/kddcup.data_10_percent',50000,0.8, encoding="ohe")
 
     # test that the label are the same for train and test set.
     test_label=np.unique(s_test[1])
