@@ -33,11 +33,11 @@ def main():
 
     parser = Parser(PATH_SAVE,LOG_PATH)
 
-    cluster_model = HClustering(n_clusters=100)
+    cluster_model = DBSCANModel()
   
 
     # Load and preprocess data
-    s_train,s_test=parser.split_dataset('../data/kddcup.data_10_percent',100000,0.8, encoding="freq")
+    s_train,s_test=parser.split_dataset('../data/kddcup.data_10_percent',50000,0.8, encoding="target")
 
     # test that the label are the same for train and test set.
     test_label=np.unique(s_test[1])
@@ -64,9 +64,9 @@ def main():
     # Train the cluster model
     # data=sparse_array # remove for feature reduction
 
-    if os.path.exists(PATH_SAVE+"hcluster.pkl"):
+    if os.path.exists(PATH_SAVE+"dbscan.pkl"):
             # File exists, so load the data from the file
-            with open(PATH_SAVE+"hcluster.pkl", 'rb') as file:
+            with open(PATH_SAVE+"dbscan.pkl", 'rb') as file:
                 save = pickle.load(file)
                 cluster_model = save[0]
                 predict_labels_train = save[1]
@@ -75,7 +75,7 @@ def main():
     else:
             predict_labels_train=cluster_model.train(data_train)
             to_save = [cluster_model, predict_labels_train]
-            with open(PATH_SAVE+"hcluster.pkl", 'wb') as file:
+            with open(PATH_SAVE+"dbscan.pkl", 'wb') as file:
                 pickle.dump(to_save, file)
             print("File does not exist. Data has been saved.")
 
@@ -91,15 +91,15 @@ def main():
     print("==== Cluster label begining ====")
     cluster_label = ClusterLabel(predict_labels_train,label_train,cluster_model.n_clusters)
     cluster_label.cluster_stat()
-    predict_label_test=cluster_model.predict(data_test)
-    pl=cluster_label.get_predicted_label(predict_label_test)
-    #pl=cluster_label.get_predicted_label(predict_labels_train)
+    #predict_label_test=cluster_model.predict(data_test)
+    #pl=cluster_label.get_predicted_label(predict_label_test)
+    pl=cluster_label.get_predicted_label(predict_labels_train)
     
-    res=cluster_label.calc_stat(label_test,pl)
-    #res=cluster_label.calc_stat(label_train,pl)
+    #res=cluster_label.calc_stat(label_test,pl)
+    res=cluster_label.calc_stat(label_train,pl)
     
-    anomaly_ratio = cluster_label.calc_anomaly_ratio(label_test,pl)
-    #anomaly_ratio = cluster_label.calc_anomaly_ratio(label_train,pl)
+    #anomaly_ratio = cluster_label.calc_anomaly_ratio(label_test,pl)
+    anomaly_ratio = cluster_label.calc_anomaly_ratio(label_train,pl)
     cluster_label.plot_anomaly_ratio(anomaly_ratio)
     cluster_label.plot(res)
 

@@ -2,7 +2,7 @@ from sklearn.cluster import DBSCAN;
 from models.cluster_model import ClusterModel;
 
 class DBSCANModel(ClusterModel):
-    def __init__(self, eps=3, **kwargs):
+    def __init__(self, eps=3, n_jobs=-1, **kwargs):
         super().__init__(**kwargs)
         self.model = DBSCAN(eps=eps, **kwargs)
 
