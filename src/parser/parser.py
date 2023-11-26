@@ -76,6 +76,7 @@ class Parser:
     def split_dataset(self, file_name, clustering_length, ratio, encoding='ohe'):
         preprocess = Preprocess(file_name)
         preprocess.create_label_content()
+        preprocess.print_labels_dict()
 
         train_dataset_path = self.path_save + "train_dataset.csv"
         test_dataset_path = self.path_save + "test_dataset.csv"  
