@@ -24,7 +24,12 @@ def reduction(sparse_array,n_components_ratio=None):
     feature_reduction.create_model(n_components_ratio)
     data = feature_reduction.fit_transform(sparse_array)
 
-    return data,n_components_ratio
+    feature_names = list(range(sparse_array.shape[1]))
+    components = feature_reduction.model.get_feature_names_out(feature_names)
+    # Getting top features for each component
+    top_features = [feature_names[j] for j in components.argsort()[::-1]]
+
+    return data,n_components_ratio, top_features
 
 def main():
     # Write data variable
@@ -56,8 +61,8 @@ def main():
 
     # Feature reduction
 
-    data_train,n=reduction(s_train[0])
-    data_test,n=reduction(s_test[0],n)
+    data_train,n,features=reduction(s_train[0])
+    data_test,n,features=reduction(s_test[0],n)
     label_train=s_train[1]
     label_test=s_test[1]
 
@@ -102,8 +107,9 @@ def main():
     anomaly_ratio = cluster_label.calc_anomaly_ratio(label_train,pl)
     cluster_label.plot_anomaly_ratio(anomaly_ratio)
     cluster_label.plot(res)
-
-    # print(res)
+    # res_metrics=cluster_label.calc_metrics(label_test,pl)
+    # cluster_label.plot_metrics(res_metrics,res_accuracy)
+    cluster_label.plot_combined_pairwise(data_train,label_train,features,20,"../results/dbscan/cluster.png")
 
 
 if __name__ == '__main__':

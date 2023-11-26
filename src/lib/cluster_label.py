@@ -1,11 +1,10 @@
 import numpy as np
-
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-
-
-
-
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
+import pandas as pd
+import random
+import seaborn as sns
 
 class ClusterLabel:
     def __init__(self,cluster_affect,label,n_clusters):
@@ -20,7 +19,19 @@ class ClusterLabel:
 
         self.cluster_distribution = [{}]*self.n_clusters
         
-
+    """"
+    1. Initialization of Cluster Distribution: 
+       For each cluster, it initializes a dictionary that tracks the count of each unique label present in the cluster. 
+       This is achieved by iterating over the total number of clusters (self.n_clusters) and setting up a dictionary 
+       for each cluster with all unique labels initialized to a count of zero.
+    2. Counting Labels in Each Cluster: 
+       The function then iterates over all the data points (labels) and updates the count of the corresponding label 
+       in the appropriate cluster (as indicated by self.cluster_affect, which holds the cluster assignment for each data point).
+       This step effectively calculates how many times each label occurs in each cluster.
+    
+    The resultant self.cluster_distribution provides view of the label composition of each cluster,
+    while self.cluster_label gives a quick reference to the most characteristic label of each cluster.
+    """
 
     def cluster_stat(self):
         for i in tqdm(range(self.n_clusters)):
@@ -49,6 +60,62 @@ class ClusterLabel:
             if label[i] == predict_label[i]:
                 res[label[i]]['correct'] += 1
         return res
+            
+    """
+    Calculate metrics like precisoin, recall and F1-score, 
+    """
+    def calc_metrics(self, labels, predict_labels):
+        res = {}
+
+        for cluster in self.unique_label: 
+                res[cluster] = {
+                    'precision': precision_score(labels, predict_labels, labels=[cluster], average=None),
+                    'recall': recall_score(labels, predict_labels, labels=[cluster], average=None),
+                    'f1_score': f1_score(labels, predict_labels, labels=[cluster], average=None)
+                }
+        return res
+        
+    def plot_metrics(self,metrics_dict,dict):
+        categories = []
+        accuracies = []
+        precisions = []
+        recalls = []
+        f1_scores = []
+
+        for category, values in metrics_dict.items():
+            categories.append(category)
+            precisions.extend(values['precision'])
+            recalls.extend(values['recall'])
+            f1_scores.extend(values['f1_score'])
+            if (category in dict):
+                total = dict[category]['total']
+                correct = dict[category]['correct']
+                accuracy = correct/total if total > 0 else 0
+            else:
+                accuracy = -0.1
+            accuracies.append(accuracy)
+
+        # Creating the bar chart
+        x = np.arange(len(categories))
+        width = 0.2
+
+        plt.figure(figsize=(12, 6))
+        plt.bar(x - 1.5*width, precisions, width, label='Precision')
+        plt.bar(x, - 0.5*width, recalls, label='Recall')
+        plt.bar(x + 0.5*width, f1_scores, width, label='F1 Score')
+        plt.bar(x + 1.5*width, accuracies, width, label='Accuracy')
+
+        plt.xlabel('Category')
+        plt.ylabel('Scores (%)')
+        plt.title('Accuracy, Recall, Precision and F1 Score for Each Category')
+        plt.xticks(x, categories, rotation=45)
+        plt.ylim(-0.1, 1.1)
+        plt.grid(axis='y')
+        plt.legend()
+
+        # Display the plot
+        plt.show()
+
 
     def calc_anomaly_ratio(self,label,predict_label):
         res = {}
@@ -70,13 +137,11 @@ class ClusterLabel:
                     res["anomaly"]['correct'] += 1
     
         return res
-
-        
+    
     def plot(self, stats_dict):
         categories = []
         accuracies = []
         counts = []
-
         for category, values in stats_dict.items():
             total = values['total']
             correct = values['correct']
@@ -133,7 +198,33 @@ class ClusterLabel:
         plt.ylim(0, 100)  # Ratio is between 0 and 1
         plt.grid(axis='y')
 
-        # Display the plot
+    def plot_combined_pairwise(self, data_out, labels, features, sample_size_by_cat, save_path):
+        # Check if the sample size is larger than the dataset
+        indices = []
+        if sample_size_by_cat*len(self.unique_label) > len(data_out):
+            indices = [i for i in range(len(data_out))]
+        else :
+            # Randomly sample the data
+            for label in self.unique_label:
+                indices_label = []
+                for i in range(len(labels)):
+                    if (labels[i] == label):
+                        indices_label.append(i)
+                n = min(sample_size_by_cat,len(indices_label))
+                indices_label = random.sample(indices_label,n)
+                indices.extend(indices_label)
+        
+        sampled_data_out = data_out[indices]
+        sampled_labels = labels[indices]
+        df = pd.DataFrame(sampled_data_out, columns=features)
+        df['Cluster'] = sampled_labels
+
+        pairplot = sns.pairplot(df, hue='Cluster', palette='viridis')
+        plt.suptitle('Pairwise Plots of Features with Cluster Labeling (Sampled Data)', y=1.02)
+
+        # Save the plot to a file
+        pairplot.savefig(save_path)
+        plt.close()
             
 
         
