@@ -26,9 +26,13 @@ class Preprocess:
     
     def print_labels_dict(self):
         print("=== Data information ===\n")
-        print("Label | Nombre")
+        max_label_length = max(len(label) for label in self.labels_dict.keys())
+        print(f"{'Label'.ljust(max_label_length)} | {'Length'}")
+        print(f"{'-' * max_label_length} | {'-' * 6}")
+
         for label, list in self.labels_dict.items():
-            print(label," : ",len(list))
+            print(f"{label.ljust(max_label_length)} | {len(list)}")
+
     
     def save_labels_dict(self,csv_path):
         with open(csv_path,'w') as file:
@@ -99,11 +103,12 @@ class Preprocess:
                     
 
 if __name__ == "__main__":
-    DATA_PATH = "../data/kddcup.data"
-    TRAIN_DATASET_PATH = "../data/output/parsing/train.data"
-    TEST_DATASET_PATH = "../data/output/parsing/test.data"
+    DATA_PATH = "../../data/kddcup.data_10_percent"
+    TRAIN_DATASET_PATH = "../../data/output/temp/train.csv"
+    TEST_DATASET_PATH = "../../data/output/temp/test.csv"
     preprocess = Preprocess(DATA_PATH)
     preprocess.create_label_content()
+    preprocess.print_labels_dict()
     preprocess.create_train_test_dataset(TRAIN_DATASET_PATH,TEST_DATASET_PATH,100000,0.8)
         
 
