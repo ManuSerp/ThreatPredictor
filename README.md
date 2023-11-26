@@ -81,6 +81,12 @@ Try hcluster, mean shift, db scan, spectr, with small set and the 3 encoding to 
 Expliquer que on veut chercher des anomalies pour les clusterise ! Détection d'inconnues!
 expliquer pk 100 cluster dans kmean
 
+parler des compute time and memory usage
+
+- kmean 30sec
+- hcluster 3min on 100k
+- meanshift 10min on 100k
+
 mettre un CNN pour demontrer la baseline de classification
 
 Hyperparameter tuning
