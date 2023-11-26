@@ -49,6 +49,28 @@ class ClusterLabel:
             if label[i] == predict_label[i]:
                 res[label[i]]['correct'] += 1
         return res
+
+    def calc_anomaly_ratio(self,label,predict_label):
+        res = {}
+        res["normal."] = {}
+        res["normal."]['total'] = 0
+        res["normal."]['correct'] = 0
+        res["anomaly"] = {}
+        res["anomaly"]['total'] = 0
+        res["anomaly"]['correct'] = 0
+
+        for i in range(len(label)):
+            if label[i] == "normal.":
+                res["normal."]['total'] += 1
+                if label[i] == predict_label[i]:
+                    res["normal."]['correct'] += 1
+            else:
+                res["anomaly"]['total'] += 1
+                if predict_label[i] != "normal.":
+                    res["anomaly"]['correct'] += 1
+    
+        return res
+
         
     def plot(self, stats_dict):
         categories = []
@@ -88,8 +110,31 @@ class ClusterLabel:
         # Display the plot
         plt.tight_layout()
         plt.show()
-        
-        
+
+    def plot_anomaly_ratio(self, anomaly_ratio):
+        categories = []
+        ratios = []
+
+        for category, dic in anomaly_ratio.items():
+            # Calculate the ratio
+            ratio = dic['correct'] / dic['total'] if dic['total'] > 0 else 0
+            ratio=ratio*100
+            print(f"Anomaly detection analysis:\n{category}: {ratio:.2f}%")
+            categories.append(category)
+            ratios.append(ratio)
+
+        # Create the bar chart
+        plt.figure(figsize=(12, 6))
+        plt.bar(categories, ratios, color='purple')
+        plt.xlabel('Category')
+        plt.ylabel('Anomaly Ratio')
+        plt.title('Anomaly Ratio by Category')
+        plt.xticks(rotation=45)
+        plt.ylim(0, 100)  # Ratio is between 0 and 1
+        plt.grid(axis='y')
+
+        # Display the plot
+            
 
         
 

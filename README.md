@@ -75,8 +75,7 @@ kmean no similarity
 Try hcluster, mean shift, db scan, spectr, with small set and the 3 encoding to build data.
 
 Expliquer que on veut chercher des anomalies pour les clusterise ! Détection d'inconnues!
-
-Faire un rate de normal/pas normal ce qui montrera la capacité a trouver des anomalies
+expliquer pk 100 cluster dans kmean
 
 mettre un CNN pour demontrer la baseline de classification
 

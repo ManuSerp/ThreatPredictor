@@ -30,7 +30,7 @@ def main():
 
     
     parser = Parser(PATH_SAVE,LOG_PATH)
-    cluster_model = KMeanModel(n_clusters=50, random_state=0)
+    cluster_model = KMeanModel(n_clusters=100, random_state=0)
 
 
 
@@ -74,8 +74,9 @@ def main():
     predict_label_test=cluster_model.predict(data_test)
     pl=cluster_label.get_predicted_label(predict_label_test)
     res=cluster_label.calc_stat(label_test,pl)
+    anomaly_ratio = cluster_label.calc_anomaly_ratio(label_test,pl)
+    cluster_label.plot_anomaly_ratio(anomaly_ratio)
     cluster_label.plot(res)
-
     print(res)
 
 
