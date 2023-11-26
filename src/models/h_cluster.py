@@ -25,6 +25,7 @@ class HClustering(ClusterModel):
         
 
         result = []
+        print("Len X: ", len(X))
         for i in tqdm(range(len(X))):
             result.append(self.find_closest_cluster(X[i], clusters_members, self.model.labels_))
 

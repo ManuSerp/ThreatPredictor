@@ -11,6 +11,12 @@ from parser.parser import Parser
 from parser.feature_reduction import FeatureReduction
 from lib.cluster_label import ClusterLabel
 
+# ANSI escape codes for colors
+RED = '\033[91m'
+GREEN = '\033[92m'
+ENDC = '\033[0m' 
+
+
 def reduction(sparse_array,n_components_ratio=None):
     feature_reduction = FeatureReduction('TruncatedSVD')
     if n_components_ratio is None:
@@ -27,11 +33,11 @@ def main():
 
     parser = Parser(PATH_SAVE,LOG_PATH)
 
-    cluster_model = HClustering(n_clusters=22)
+    cluster_model = HClustering(n_clusters=100)
   
 
     # Load and preprocess data
-    s_train,s_test=parser.split_dataset('../data/kddcup.data_10_percent',100000,0.8, encoding="target")
+    s_train,s_test=parser.split_dataset('../data/kddcup.data_10_percent',50000,0.8, encoding="freq")
 
     # test that the label are the same for train and test set.
     test_label=np.unique(s_test[1])
@@ -88,6 +94,8 @@ def main():
     predict_label_test=cluster_model.predict(data_test)
     pl=cluster_label.get_predicted_label(predict_label_test)
     res=cluster_label.calc_stat(label_test,pl)
+    anomaly_ratio = cluster_label.calc_anomaly_ratio(label_test,pl)
+    cluster_label.plot_anomaly_ratio(anomaly_ratio)
     cluster_label.plot(res)
 
     # print(res)
